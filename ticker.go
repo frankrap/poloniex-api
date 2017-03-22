@@ -15,16 +15,16 @@ import (
 //  '8.63286802','11983.47150109',0,'0.00107920','0.00045422']
 
 type Tick struct {
-	currencyPair  string
-	last          string
-	lowestAsk     string
-	highestBid    string
-	percentChange string
-	baseVolume    string
-	quoteVolume   string
-	isFrozen      float64
-	dayHigh       string
-	dayLow        string
+	CurrencyPair  string
+	Last          string
+	LowestAsk     string
+	HighestBid    string
+	PercentChange string
+	BaseVolume    string
+	QuoteVolume   string
+	IsFrozen      float64
+	DayHigh       string
+	DayLow        string
 }
 
 type Ticker <-chan Tick
@@ -37,7 +37,6 @@ func SubscribeTicker(client *turnpike.Client) (Ticker, error) {
 
 	handler := func(args []interface{}, kwargs map[string]interface{}) {
 
-		// fmt.Println(args)
 		ticker <- Tick{
 			args[0].(string),
 			args[1].(string),
@@ -68,3 +67,29 @@ func UnsubscribeTicker(client *turnpike.Client) error {
 	close(ticker)
 	return nil
 }
+
+// func (t *Tick) UnmarshalJSON(buf []byte) error {
+
+//     tmp := []interface{}{
+//         &t.CurrencyPair,
+//         &t.Last,
+//         &t.LowestAsk,
+//         &t.HighestBid,
+//         &t.PercentChange,
+//         &t.BaseVolume,
+//         &t.QuoteVolume,
+//         &t.IsFrozen,
+//         &t.DayHigh,
+//         &t.DayLow,
+//     }
+
+//     if err := json.Unmarshal(buf, &tmp); err != nil {
+//         return err
+//     }
+
+//     if got, want := len(tmp), 10; got != want {
+//         return fmt.Errorf("wrong number of fields in Tick: %d != %d", got, want)
+//     }
+
+//     return nil
+// }
