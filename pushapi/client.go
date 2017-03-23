@@ -1,4 +1,4 @@
-package poloniex
+package pushapi
 
 import (
 	"fmt"

@@ -1,7 +1,10 @@
 package main
 
 import (
-	"api/poloniex"
+	"api/poloniex/publicapi"
+	"api/poloniex/pushapi"
+	"fmt"
+	"log"
 )
 
 const (
@@ -10,49 +13,53 @@ const (
 )
 
 func main() {
+	printTicker()
+}
 
-	// Print ticker periodically
-	/*
-		client, err := poloniex.NewPushClient()
+// Print ticker periodically
+func printTicker() {
+	client, err := pushapi.NewPushClient()
 
-		if err != nil {
-			log.Fatal(err)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ticker, err := client.SubscribeTicker()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go func() {
+		for {
+			msg := <-ticker
+			fmt.Printf("%#v\n", pushapi.Tick(msg))
 		}
 
-		ticker, err := client.SubscribeTicker()
+	}()
 
-		if err != nil {
-			log.Fatal(err)
-		}
+	select {}
+}
 
-		go func() {
-			for {
-				msg := <-ticker
-				fmt.Println(poloniex.Tick(msg).Last)
-			}
+// Print All order books with depth 2
+func printAllOrderBook() {
 
-		}()
+	client := publicapi.NewPublicClient()
 
-		select {}
-	*/
+	res, err := client.GetAllOrderBooks(2)
 
-	client := poloniex.NewPublicClient()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// Print All order books with depth 2
-	/*
+	fmt.Println(res)
+}
 
-		res, err := client.GetAllOrderBooks(2)
+// Print BTC_STEEM order book with depth 200
+func printOrderBook() {
 
-		if err != nil {
-			log.Fatal(err)
-		}
+	client := publicapi.NewPublicClient()
+	ob, _ := client.GetOrderBook("BTC_STEEM", 200)
+	fmt.Println(len(ob.Asks))
 
-		fmt.Println(res)
-	*/
-
-	// Print BTC_STEEM order book with depth 200
-	/*
-		ob, _ := client.GetOrderBook("BTC_STEEM", 200)
-		fmt.Println(len(ob.Asks))
-	*/
 }

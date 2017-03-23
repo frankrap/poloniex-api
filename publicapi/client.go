@@ -1,4 +1,4 @@
-package poloniex
+package publicapi
 
 import (
 	"fmt"
@@ -42,7 +42,7 @@ func NewPublicClient() *PublicClient {
 	return &PublicClient{&client, time.Tick(reqInterval)}
 }
 
-func (c *PublicClient) do(method, url, payload string, authNeeded bool) ([]byte, error) {
+func (c *PublicClient) do(method, url, payload string, auth bool) ([]byte, error) {
 
 	req, err := http.NewRequest(method, url, strings.NewReader(payload))
 	if err != nil {

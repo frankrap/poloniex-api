@@ -1,4 +1,4 @@
-package poloniex
+package publicapi
 
 import (
 	"encoding/json"
@@ -30,7 +30,8 @@ func (o *Order) UnmarshalJSON(buf []byte) error {
 	}
 
 	if got, want := len(tmp), 2; got != want {
-		return fmt.Errorf("wrong number of fields in Order: %d != %d", got, want)
+		return fmt.Errorf("wrong number of fields in Order: %d != %d",
+			got, want)
 	}
 
 	return nil
