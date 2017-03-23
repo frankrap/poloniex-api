@@ -1,11 +1,10 @@
 package poloniex
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"strconv"
+	"strings"
 )
 
 type AllOrderBooks map[string]OrderBook
@@ -37,7 +36,7 @@ func (o *Order) UnmarshalJSON(buf []byte) error {
 	return nil
 }
 
-func GetAllOrderBooks(depth int) (AllOrderBooks, error) {
+func (client *PublicClient) GetAllOrderBooks(depth int) (AllOrderBooks, error) {
 
 	params := map[string]string{
 		"command":      "returnOrderBook",
@@ -47,56 +46,38 @@ func GetAllOrderBooks(depth int) (AllOrderBooks, error) {
 
 	url := buildUrl(params)
 
-	response, err := http.Get(url)
-
+	resp, err := client.do("GET", url, "", false)
 	if err != nil {
-		return nil, fmt.Errorf("http get: %v", err)
-	}
-
-	defer response.Body.Close()
-
-	var buf bytes.Buffer
-	_, err = buf.ReadFrom(response.Body)
-	if err != nil {
-		return nil, fmt.Errorf("readfrom: %v", err)
+		return nil, fmt.Errorf("get: %v", err)
 	}
 
 	var res = make(AllOrderBooks)
 
-	if err := json.Unmarshal(buf.Bytes(), &res); err != nil {
+	if err := json.Unmarshal(resp, &res); err != nil {
 		return nil, fmt.Errorf("json unmarshal: %v", err)
 	}
 
 	return res, nil
 }
 
-func GetOrderBook(currencyPair string, depth int) (*OrderBook, error) {
+func (client *PublicClient) GetOrderBook(currencyPair string, depth int) (*OrderBook, error) {
 
 	params := map[string]string{
 		"command":      "returnOrderBook",
-		"currencyPair": currencyPair,
+		"currencyPair": strings.ToUpper(currencyPair),
 		"depth":        strconv.Itoa(depth),
 	}
 
 	url := buildUrl(params)
 
-	response, err := http.Get(url)
-
+	resp, err := client.do("GET", url, "", false)
 	if err != nil {
-		return nil, fmt.Errorf("http get: %v", err)
-	}
-
-	defer response.Body.Close()
-
-	var buf bytes.Buffer
-	_, err = buf.ReadFrom(response.Body)
-	if err != nil {
-		return nil, fmt.Errorf("readfrom: %v", err)
+		return nil, fmt.Errorf("get: %v", err)
 	}
 
 	var res OrderBook
 
-	if err := json.Unmarshal(buf.Bytes(), &res); err != nil {
+	if err := json.Unmarshal(resp, &res); err != nil {
 		return nil, fmt.Errorf("json unmarshal: %v", err)
 	}
 

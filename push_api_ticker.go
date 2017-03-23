@@ -2,8 +2,6 @@ package poloniex
 
 import (
 	"fmt"
-
-	turnpike "gopkg.in/jcelliott/turnpike.v2"
 )
 
 // MESSAGE FORMAT:
@@ -13,6 +11,10 @@ import (
 // Example:
 // ['BTC_BBR','0.00069501','0.00074346','0.00069501', '-0.00742634',
 //  '8.63286802','11983.47150109',0,'0.00107920','0.00045422']
+
+const (
+	TICKER = "ticker"
+)
 
 type Tick struct {
 	CurrencyPair  string
@@ -31,7 +33,7 @@ type Ticker <-chan Tick
 
 var ticker chan Tick
 
-func SubscribeTicker(client *turnpike.Client) (Ticker, error) {
+func (client *PushClient) SubscribeTicker() (Ticker, error) {
 
 	ticker = make(chan Tick)
 
@@ -51,16 +53,16 @@ func SubscribeTicker(client *turnpike.Client) (Ticker, error) {
 		}
 	}
 
-	if err := client.Subscribe("ticker", nil, handler); err != nil {
+	if err := client.wampClient.Subscribe("ticker", nil, handler); err != nil {
 		return nil, fmt.Errorf("subscribe %s: %v", TICKER, err)
 	}
 
 	return ticker, nil
 }
 
-func UnsubscribeTicker(client *turnpike.Client) error {
+func (client *PushClient) UnsubscribeTicker() error {
 
-	if err := client.Unsubscribe(TICKER); err != nil {
+	if err := client.wampClient.Unsubscribe(TICKER); err != nil {
 		return fmt.Errorf("unsuscribe %s: %v", TICKER, err)
 	}
 
