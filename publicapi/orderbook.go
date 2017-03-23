@@ -50,7 +50,7 @@ func (o *Order) UnmarshalJSON(data []byte) error {
 	tmp := []interface{}{&rateStr, &o.Quantity}
 
 	if err := json.Unmarshal(data, &tmp); err != nil {
-		return err
+		return fmt.Errorf("unmarshal order: %v", err)
 	}
 
 	if got, want := len(tmp), 2; got != want {

@@ -16,6 +16,7 @@ const (
 func main() {
 
 	// printPushTicker()
+	printPublicTick()
 	// printPublicAllOrderBook()
 	// printPublicOrderBook()
 }
@@ -57,6 +58,18 @@ func printPushTicker() {
 //
 // PUBLIC API
 //
+
+func printPublicTick() {
+	client := publicapi.NewPublicClient()
+
+	res, err := client.GetTicker()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	prettyPrintJson(res)
+}
 
 // Print All order books with depth 2
 func printPublicAllOrderBook() {
