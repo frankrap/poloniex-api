@@ -12,20 +12,44 @@ type AllOrderBooks map[string]OrderBook
 type OrderBook struct {
 	Asks     []Order `json:"asks"`
 	Bids     []Order `json:"bids"`
-	IsFrozen string  `json:"isFrozen"`
-	Seq      float64
+	IsFrozen bool
+	Seq      uint64
 }
 
 type Order struct {
-	Rate     string
+	Rate     float64
 	Quantity float64
 }
 
-func (o *Order) UnmarshalJSON(buf []byte) error {
+func (o *OrderBook) UnmarshalJSON(data []byte) error {
 
-	tmp := []interface{}{&o.Rate, &o.Quantity}
+	type Alias OrderBook
+	aux := struct {
+		IsFrozen string
+		*Alias
+	}{
+		Alias: (*Alias)(o),
+	}
 
-	if err := json.Unmarshal(buf, &tmp); err != nil {
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return fmt.Errorf("unmarshal aux: %v", err)
+	}
+
+	if aux.IsFrozen != "0" {
+		o.IsFrozen = false
+	} else {
+		o.IsFrozen = true
+	}
+
+	return nil
+}
+
+func (o *Order) UnmarshalJSON(data []byte) error {
+
+	var rateStr string
+	tmp := []interface{}{&rateStr, &o.Quantity}
+
+	if err := json.Unmarshal(data, &tmp); err != nil {
 		return err
 	}
 
@@ -33,6 +57,12 @@ func (o *Order) UnmarshalJSON(buf []byte) error {
 		return fmt.Errorf("wrong number of fields in Order: %d != %d",
 			got, want)
 	}
+
+	val, err := strconv.ParseFloat(rateStr, 64)
+	if err != nil {
+		return fmt.Errorf("parsefloat: %v", err)
+	}
+	o.Rate = val
 
 	return nil
 }

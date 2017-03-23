@@ -2,6 +2,8 @@ package pushapi
 
 import (
 	"fmt"
+	"log"
+	"strconv"
 )
 
 // MESSAGE FORMAT:
@@ -18,15 +20,15 @@ const (
 
 type Tick struct {
 	CurrencyPair  string
-	Last          string
-	LowestAsk     string
-	HighestBid    string
-	PercentChange string
-	BaseVolume    string
-	QuoteVolume   string
-	IsFrozen      float64
-	DayHigh       string
-	DayLow        string
+	Last          float64
+	LowestAsk     float64
+	HighestBid    float64
+	PercentChange float64
+	BaseVolume    float64
+	QuoteVolume   float64
+	IsFrozen      bool
+	High24hr      float64
+	Low24hr       float64
 }
 
 type Ticker <-chan Tick
@@ -39,18 +41,66 @@ func (client *PushClient) SubscribeTicker() (Ticker, error) {
 
 	handler := func(args []interface{}, kwargs map[string]interface{}) {
 
-		ticker <- Tick{
-			args[0].(string),
-			args[1].(string),
-			args[2].(string),
-			args[3].(string),
-			args[4].(string),
-			args[5].(string),
-			args[6].(string),
-			args[7].(float64),
-			args[8].(string),
-			args[9].(string),
+		var tick = Tick{}
+
+		tick.CurrencyPair = args[0].(string)
+
+		val, err := strconv.ParseFloat(args[1].(string), 64)
+		if err != nil {
+			log.Fatal(err)
 		}
+		tick.Last = val
+
+		val, err = strconv.ParseFloat(args[2].(string), 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+		tick.LowestAsk = val
+
+		val, err = strconv.ParseFloat(args[3].(string), 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+		tick.HighestBid = val
+
+		val, err = strconv.ParseFloat(args[4].(string), 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+		tick.PercentChange = val
+
+		val, err = strconv.ParseFloat(args[5].(string), 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+		tick.BaseVolume = val
+
+		val, err = strconv.ParseFloat(args[6].(string), 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+		tick.QuoteVolume = val
+
+		f := args[7].(float64)
+		if f == 0 {
+			tick.IsFrozen = false
+		} else {
+			tick.IsFrozen = true
+		}
+
+		val, err = strconv.ParseFloat(args[8].(string), 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+		tick.High24hr = val
+
+		val, err = strconv.ParseFloat(args[9].(string), 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+		tick.Low24hr = val
+
+		ticker <- tick
 	}
 
 	if err := client.wampClient.Subscribe("ticker", nil, handler); err != nil {
@@ -69,29 +119,3 @@ func (client *PushClient) UnsubscribeTicker() error {
 	close(ticker)
 	return nil
 }
-
-// func (t *Tick) UnmarshalJSON(buf []byte) error {
-
-//     tmp := []interface{}{
-//         &t.CurrencyPair,
-//         &t.Last,
-//         &t.LowestAsk,
-//         &t.HighestBid,
-//         &t.PercentChange,
-//         &t.BaseVolume,
-//         &t.QuoteVolume,
-//         &t.IsFrozen,
-//         &t.DayHigh,
-//         &t.DayLow,
-//     }
-
-//     if err := json.Unmarshal(buf, &tmp); err != nil {
-//         return err
-//     }
-
-//     if got, want := len(tmp), 10; got != want {
-//         return fmt.Errorf("wrong number of fields in Tick: %d != %d", got, want)
-//     }
-
-//     return nil
-// }
