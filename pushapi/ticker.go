@@ -2,7 +2,6 @@ package pushapi
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 )
 
@@ -39,66 +38,68 @@ func (client *PushClient) SubscribeTicker() (Ticker, error) {
 
 	ticker = make(chan Tick)
 
+	convertArg := func(arg interface{}) (float64, error) {
+
+		if v, ok := arg.(string); ok {
+
+			val, err := strconv.ParseFloat(v, 64)
+			if err != nil {
+				return 0, fmt.Errorf(" : %v", arg)
+			}
+			return val, nil
+
+		} else {
+			return 0, fmt.Errorf("type assertion failed: %v", arg)
+		}
+	}
+
 	handler := func(args []interface{}, kwargs map[string]interface{}) {
 
 		var tick = Tick{}
 
-		tick.CurrencyPair = args[0].(string)
-
-		val, err := strconv.ParseFloat(args[1].(string), 64)
-		if err != nil {
-			log.Fatal(err)
-		}
-		tick.Last = val
-
-		val, err = strconv.ParseFloat(args[2].(string), 64)
-		if err != nil {
-			log.Fatal(err)
-		}
-		tick.LowestAsk = val
-
-		val, err = strconv.ParseFloat(args[3].(string), 64)
-		if err != nil {
-			log.Fatal(err)
-		}
-		tick.HighestBid = val
-
-		val, err = strconv.ParseFloat(args[4].(string), 64)
-		if err != nil {
-			log.Fatal(err)
-		}
-		tick.PercentChange = val
-
-		val, err = strconv.ParseFloat(args[5].(string), 64)
-		if err != nil {
-			log.Fatal(err)
-		}
-		tick.BaseVolume = val
-
-		val, err = strconv.ParseFloat(args[6].(string), 64)
-		if err != nil {
-			log.Fatal(err)
-		}
-		tick.QuoteVolume = val
-
-		f := args[7].(float64)
-		if f == 0 {
-			tick.IsFrozen = false
+		if v, ok := args[0].(string); ok {
+			tick.CurrencyPair = v
 		} else {
-			tick.IsFrozen = true
+			return
 		}
 
-		val, err = strconv.ParseFloat(args[8].(string), 64)
-		if err != nil {
-			log.Fatal(err)
-		}
-		tick.High24hr = val
+		var err error
 
-		val, err = strconv.ParseFloat(args[9].(string), 64)
-		if err != nil {
-			log.Fatal(err)
+		if tick.Last, err = convertArg(args[1]); err != nil {
+			return
 		}
-		tick.Low24hr = val
+		if tick.LowestAsk, err = convertArg(args[2]); err != nil {
+			return
+		}
+		if tick.HighestBid, err = convertArg(args[3]); err != nil {
+			return
+		}
+		if tick.PercentChange, err = convertArg(args[4]); err != nil {
+			return
+		}
+		if tick.BaseVolume, err = convertArg(args[5]); err != nil {
+			return
+		}
+		if tick.QuoteVolume, err = convertArg(args[6]); err != nil {
+			return
+		}
+
+		if v, ok := args[7].(float64); ok {
+			if v == 0 {
+				tick.IsFrozen = false
+			} else {
+				tick.IsFrozen = true
+			}
+		} else {
+			return
+		}
+
+		if tick.High24hr, err = convertArg(args[8]); err != nil {
+			return
+		}
+		if tick.Low24hr, err = convertArg(args[9]); err != nil {
+			return
+		}
 
 		ticker <- tick
 	}
