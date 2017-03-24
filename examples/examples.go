@@ -22,7 +22,8 @@ func main() {
 	// printPublicAllOrderBook()
 	// printPublicOrderBook()
 	// printPast200TradeHistory()
-	printTradeHistory()
+	// printTradeHistory()
+	printChartData()
 }
 
 func prettyPrintJson(msg interface{}) {
@@ -143,6 +144,22 @@ func printTradeHistory() {
 	end := time.Now()
 	start := end.Add(-10 * time.Minute)
 	res, err := client.GetTradeHistory("BTC_STEEM", start, end)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	prettyPrintJson(res)
+}
+
+// Print BTC_STEEM  30min candlesticks the last 10 hours
+func printChartData() {
+
+	client := publicapi.NewPublicClient()
+
+	end := time.Now()
+	start := end.Add(-10 * time.Hour)
+	res, err := client.GetChartData("BTC_STEEM", start, end, 1800)
 
 	if err != nil {
 		log.Fatal(err)
