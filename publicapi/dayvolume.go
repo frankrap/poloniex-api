@@ -6,8 +6,8 @@ import (
 	"strconv"
 )
 
-type AllDayVolumes struct {
-	AllDayVolumes   map[string]DayVolume
+type DayVolumes struct {
+	DayVolumes      map[string]DayVolume
 	PrimaryCurrency map[string]float64
 }
 
@@ -33,7 +33,7 @@ func convertToDayVolume(value map[string]interface{}) (DayVolume, error) {
 	return dv, nil
 }
 
-func (d *AllDayVolumes) UnmarshalJSON(data []byte) error {
+func (a *DayVolumes) UnmarshalJSON(data []byte) error {
 
 	adv := make(map[string]interface{})
 
@@ -41,8 +41,8 @@ func (d *AllDayVolumes) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("unmarshal adv: %v", err)
 	}
 
-	d.AllDayVolumes = make(map[string]DayVolume)
-	d.PrimaryCurrency = make(map[string]float64)
+	a.DayVolumes = make(map[string]DayVolume)
+	a.PrimaryCurrency = make(map[string]float64)
 
 	for key, value := range adv {
 
@@ -52,11 +52,11 @@ func (d *AllDayVolumes) UnmarshalJSON(data []byte) error {
 			if res, err := convertToDayVolume(value); err != nil {
 				return fmt.Errorf("convert to dayvolume: %v", err)
 			} else {
-				d.AllDayVolumes[key] = res
+				a.DayVolumes[key] = res
 			}
 		case string:
 			res, _ := strconv.ParseFloat(value, 64)
-			d.PrimaryCurrency[key] = res
+			a.PrimaryCurrency[key] = res
 		default:
 			return fmt.Errorf("unmarshal adv error type")
 		}
@@ -65,7 +65,7 @@ func (d *AllDayVolumes) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (client *PublicClient) GetAllDayVolumes() (*AllDayVolumes, error) {
+func (client *PublicClient) GetDayVolumes() (*DayVolumes, error) {
 
 	params := map[string]string{
 		"command": "return24hVolume",
@@ -78,7 +78,7 @@ func (client *PublicClient) GetAllDayVolumes() (*AllDayVolumes, error) {
 		return nil, fmt.Errorf("get: %v", err)
 	}
 
-	res := AllDayVolumes{}
+	res := DayVolumes{}
 
 	if err := json.Unmarshal(resp, &res); err != nil {
 		return nil, fmt.Errorf("json unmarshal: %v", err)

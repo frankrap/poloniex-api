@@ -17,13 +17,14 @@ const (
 func main() {
 
 	// printPushTicker()
-	// printPublicAllTick()
-	// printPublicAllDayVolumes()
-	// printPublicAllOrderBook()
+	// printPublicTicks()
+	// printPublicDayVolumes()
+	// printPublicOrderBooks()
 	// printPublicOrderBook()
 	// printPast200TradeHistory()
 	// printTradeHistory()
-	printChartData()
+	// printChartData()
+	printCurrencies()
 }
 
 func prettyPrintJson(msg interface{}) {
@@ -69,11 +70,11 @@ func printPushTicker() {
 // PUBLIC API
 //
 
-func printPublicAllTick() {
+func printPublicTicks() {
 
 	client := publicapi.NewPublicClient()
 
-	res, err := client.GetTicker()
+	res, err := client.GetTicks()
 
 	if err != nil {
 		log.Fatal(err)
@@ -82,11 +83,11 @@ func printPublicAllTick() {
 	prettyPrintJson(res)
 }
 
-func printPublicAllDayVolumes() {
+func printPublicDayVolumes() {
 
 	client := publicapi.NewPublicClient()
 
-	res, err := client.GetAllDayVolumes()
+	res, err := client.GetDayVolumes()
 
 	if err != nil {
 		log.Fatal(err)
@@ -96,11 +97,11 @@ func printPublicAllDayVolumes() {
 }
 
 // Print All order books with depth 2
-func printPublicAllOrderBook() {
+func printPublicOrderBooks() {
 
 	client := publicapi.NewPublicClient()
 
-	res, err := client.GetAllOrderBooks(2)
+	res, err := client.GetOrderBooks(2)
 
 	if err != nil {
 		log.Fatal(err)
@@ -123,6 +124,7 @@ func printPublicOrderBook() {
 	prettyPrintJson(res)
 }
 
+// Print past 200 BTC_STEEM trades
 func printPast200TradeHistory() {
 
 	client := publicapi.NewPublicClient()
@@ -160,6 +162,19 @@ func printChartData() {
 	end := time.Now()
 	start := end.Add(-10 * time.Hour)
 	res, err := client.GetChartData("BTC_STEEM", start, end, 1800)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	prettyPrintJson(res)
+}
+
+func printCurrencies() {
+
+	client := publicapi.NewPublicClient()
+
+	res, err := client.GetCurrencies()
 
 	if err != nil {
 		log.Fatal(err)

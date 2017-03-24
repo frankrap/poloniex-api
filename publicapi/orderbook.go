@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-type AllOrderBooks map[string]OrderBook
+type OrderBooks map[string]OrderBook
 
 type OrderBook struct {
 	Asks     []Order `json:"asks"`
@@ -67,7 +67,7 @@ func (o *Order) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (client *PublicClient) GetAllOrderBooks(depth int) (AllOrderBooks, error) {
+func (client *PublicClient) GetOrderBooks(depth int) (OrderBooks, error) {
 
 	params := map[string]string{
 		"command":      "returnOrderBook",
@@ -82,7 +82,7 @@ func (client *PublicClient) GetAllOrderBooks(depth int) (AllOrderBooks, error) {
 		return nil, fmt.Errorf("get: %v", err)
 	}
 
-	res := make(AllOrderBooks)
+	res := make(OrderBooks)
 
 	if err := json.Unmarshal(resp, &res); err != nil {
 		return nil, fmt.Errorf("json unmarshal: %v", err)

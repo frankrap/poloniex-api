@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-type AllTicks map[string]Tick
+type Ticks map[string]Tick
 
 type Tick struct {
 	Id            int     `json:"id"`
@@ -43,7 +43,7 @@ func (t *Tick) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (client *PublicClient) GetTicker() (AllTicks, error) {
+func (client *PublicClient) GetTicks() (Ticks, error) {
 
 	params := map[string]string{
 		"command": "returnTicker",
@@ -56,7 +56,7 @@ func (client *PublicClient) GetTicker() (AllTicks, error) {
 		return nil, fmt.Errorf("get: %v", err)
 	}
 
-	res := make(AllTicks)
+	res := make(Ticks)
 
 	if err := json.Unmarshal(resp, &res); err != nil {
 		return nil, fmt.Errorf("json unmarshal: %v", err)
