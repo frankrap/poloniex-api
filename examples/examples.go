@@ -24,7 +24,8 @@ func main() {
 	// printPast200TradeHistory()
 	// printTradeHistory()
 	// printChartData()
-	printCurrencies()
+	// printCurrencies()
+	printLoanOrders()
 }
 
 func prettyPrintJson(msg interface{}) {
@@ -175,6 +176,20 @@ func printCurrencies() {
 	client := publicapi.NewPublicClient()
 
 	res, err := client.GetCurrencies()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	prettyPrintJson(res)
+}
+
+// Print loan orders for BTC
+func printLoanOrders() {
+
+	client := publicapi.NewPublicClient()
+
+	res, err := client.GetLoanOrders("BTC")
 
 	if err != nil {
 		log.Fatal(err)
