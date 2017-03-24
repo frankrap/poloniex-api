@@ -78,7 +78,7 @@ func (client *PublicClient) GetAllDayVolumes() (*AllDayVolumes, error) {
 		return nil, fmt.Errorf("get: %v", err)
 	}
 
-	var res = AllDayVolumes{}
+	res := AllDayVolumes{}
 
 	if err := json.Unmarshal(resp, &res); err != nil {
 		return nil, fmt.Errorf("json unmarshal: %v", err)

@@ -23,12 +23,12 @@ type Order struct {
 
 func (o *OrderBook) UnmarshalJSON(data []byte) error {
 
-	type Alias OrderBook
+	type alias OrderBook
 	aux := struct {
 		IsFrozen string
-		*Alias
+		*alias
 	}{
-		Alias: (*Alias)(o),
+		alias: (*alias)(o),
 	}
 
 	if err := json.Unmarshal(data, &aux); err != nil {
@@ -82,7 +82,7 @@ func (client *PublicClient) GetAllOrderBooks(depth int) (AllOrderBooks, error) {
 		return nil, fmt.Errorf("get: %v", err)
 	}
 
-	var res = make(AllOrderBooks)
+	res := make(AllOrderBooks)
 
 	if err := json.Unmarshal(resp, &res); err != nil {
 		return nil, fmt.Errorf("json unmarshal: %v", err)
@@ -106,7 +106,7 @@ func (client *PublicClient) GetOrderBook(currencyPair string, depth int) (*Order
 		return nil, fmt.Errorf("get: %v", err)
 	}
 
-	var res OrderBook
+	res := OrderBook{}
 
 	if err := json.Unmarshal(resp, &res); err != nil {
 		return nil, fmt.Errorf("json unmarshal: %v", err)

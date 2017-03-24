@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 )
 
 const (
@@ -17,9 +18,11 @@ func main() {
 
 	// printPushTicker()
 	// printPublicAllTick()
-	printPublicAllDayVolumes()
+	// printPublicAllDayVolumes()
 	// printPublicAllOrderBook()
 	// printPublicOrderBook()
+	// printPast200TradeHistory()
+	printTradeHistory()
 }
 
 func prettyPrintJson(msg interface{}) {
@@ -111,6 +114,35 @@ func printPublicOrderBook() {
 	client := publicapi.NewPublicClient()
 
 	res, err := client.GetOrderBook("BTC_STEEM", 200)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	prettyPrintJson(res)
+}
+
+func printPast200TradeHistory() {
+
+	client := publicapi.NewPublicClient()
+
+	res, err := client.GetPast200TradeHistory("BTC_STEEM")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	prettyPrintJson(res)
+}
+
+// Print BTC_STEEM trade the last 10 minutes
+func printTradeHistory() {
+
+	client := publicapi.NewPublicClient()
+
+	end := time.Now()
+	start := end.Add(-10 * time.Minute)
+	res, err := client.GetTradeHistory("BTC_STEEM", start, end)
 
 	if err != nil {
 		log.Fatal(err)

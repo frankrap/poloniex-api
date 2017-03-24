@@ -22,12 +22,12 @@ type Tick struct {
 
 func (t *Tick) UnmarshalJSON(data []byte) error {
 
-	type Alias Tick
+	type alias Tick
 	aux := struct {
 		IsFrozen string
-		*Alias
+		*alias
 	}{
-		Alias: (*Alias)(t),
+		alias: (*alias)(t),
 	}
 
 	if err := json.Unmarshal(data, &aux); err != nil {
@@ -56,7 +56,7 @@ func (client *PublicClient) GetTicker() (AllTicks, error) {
 		return nil, fmt.Errorf("get: %v", err)
 	}
 
-	var res = make(AllTicks)
+	res := make(AllTicks)
 
 	if err := json.Unmarshal(resp, &res); err != nil {
 		return nil, fmt.Errorf("json unmarshal: %v", err)
