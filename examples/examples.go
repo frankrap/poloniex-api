@@ -16,13 +16,19 @@ const (
 func main() {
 
 	// printPushTicker()
-	printPublicTick()
+	// printPublicAllTick()
+	printPublicAllDayVolumes()
 	// printPublicAllOrderBook()
 	// printPublicOrderBook()
 }
 
 func prettyPrintJson(msg interface{}) {
-	jsonstr, _ := json.MarshalIndent(msg, "", "  ")
+	jsonstr, err := json.MarshalIndent(msg, "", "  ")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	fmt.Printf("%s\n", string(jsonstr))
 }
 
@@ -59,10 +65,24 @@ func printPushTicker() {
 // PUBLIC API
 //
 
-func printPublicTick() {
+func printPublicAllTick() {
+
 	client := publicapi.NewPublicClient()
 
 	res, err := client.GetTicker()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	prettyPrintJson(res)
+}
+
+func printPublicAllDayVolumes() {
+
+	client := publicapi.NewPublicClient()
+
+	res, err := client.GetAllDayVolumes()
 
 	if err != nil {
 		log.Fatal(err)

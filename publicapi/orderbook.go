@@ -58,11 +58,11 @@ func (o *Order) UnmarshalJSON(data []byte) error {
 			got, want)
 	}
 
-	val, err := strconv.ParseFloat(rateStr, 64)
-	if err != nil {
+	if val, err := strconv.ParseFloat(rateStr, 64); err != nil {
 		return fmt.Errorf("parsefloat: %v", err)
+	} else {
+		o.Rate = val
 	}
-	o.Rate = val
 
 	return nil
 }
