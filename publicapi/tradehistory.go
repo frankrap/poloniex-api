@@ -20,29 +20,6 @@ type Trade struct {
 	Total         float64 `json:"total,string"`
 }
 
-func (t *Trade) UnmarshalJSON(data []byte) error {
-
-	type alias Trade
-	aux := struct {
-		Date string `json:"Date"`
-		*alias
-	}{
-		alias: (*alias)(t),
-	}
-
-	if err := json.Unmarshal(data, &aux); err != nil {
-		return fmt.Errorf("unmarshal aux: %v", err)
-	}
-
-	if timestamp, err := time.Parse("2006-01-02 15:04:05", aux.Date); err != nil {
-		return fmt.Errorf("timestamp conversion: %v", err)
-	} else {
-		t.Date = int64(timestamp.Unix())
-	}
-
-	return nil
-}
-
 // Poloniex public API implementation of returnTradeHistory command.
 //
 // API Doc:
@@ -141,4 +118,27 @@ func (client *PublicClient) GetPast200TradeHistory(currencyPair string) (TradeHi
 	}
 
 	return res, nil
+}
+
+func (t *Trade) UnmarshalJSON(data []byte) error {
+
+	type alias Trade
+	aux := struct {
+		Date string `json:"Date"`
+		*alias
+	}{
+		alias: (*alias)(t),
+	}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return fmt.Errorf("unmarshal aux: %v", err)
+	}
+
+	if timestamp, err := time.Parse("2006-01-02 15:04:05", aux.Date); err != nil {
+		return fmt.Errorf("timestamp conversion: %v", err)
+	} else {
+		t.Date = int64(timestamp.Unix())
+	}
+
+	return nil
 }

@@ -75,7 +75,7 @@ func (c *PublicClient) do(params map[string]string) ([]byte, error) {
 	}
 
 	if res.resp.StatusCode != 200 {
-		return body, fmt.Errorf("status code: %d", res.resp.Status)
+		return body, fmt.Errorf("status code: %s", res.resp.Status)
 	}
 
 	return body, nil

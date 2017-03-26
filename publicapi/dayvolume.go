@@ -2,6 +2,7 @@ package publicapi
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 )
@@ -65,7 +66,7 @@ func convertToDayVolume(value map[string]interface{}) (DayVolume, error) {
 		if v, ok := v.(string); ok {
 
 			if val, err := strconv.ParseFloat(v, 64); err != nil {
-				return nil, fmt.Errorf("parsefloat : %v", v)
+				return nil, fmt.Errorf("parsefloat : %v", err)
 			} else {
 				dv[k] = val
 			}
@@ -77,7 +78,7 @@ func convertToDayVolume(value map[string]interface{}) (DayVolume, error) {
 	return dv, nil
 }
 
-func (a *DayVolumes) UnmarshalJSON(data []byte) error {
+func (dv *DayVolumes) UnmarshalJSON(data []byte) error {
 
 	adv := make(map[string]interface{})
 
@@ -85,8 +86,8 @@ func (a *DayVolumes) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("unmarshal adv: %v", err)
 	}
 
-	a.DayVolumes = make(map[string]DayVolume)
-	a.PrimaryCurrency = make(map[string]float64)
+	dv.DayVolumes = make(map[string]DayVolume)
+	dv.PrimaryCurrency = make(map[string]float64)
 
 	for key, value := range adv {
 
@@ -96,13 +97,18 @@ func (a *DayVolumes) UnmarshalJSON(data []byte) error {
 			if res, err := convertToDayVolume(value); err != nil {
 				return fmt.Errorf("convert to dayvolume: %v", err)
 			} else {
-				a.DayVolumes[key] = res
+				dv.DayVolumes[key] = res
 			}
+
 		case string:
-			res, _ := strconv.ParseFloat(value, 64)
-			a.PrimaryCurrency[key] = res
+			if res, err := strconv.ParseFloat(value, 64); err != nil {
+				return fmt.Errorf("parsefloat: %v", err)
+			} else {
+				dv.PrimaryCurrency[key] = res
+			}
+
 		default:
-			return fmt.Errorf("unmarshal adv error type")
+			return errors.New("unmarshal adv error type")
 		}
 	}
 
