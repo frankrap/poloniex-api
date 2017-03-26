@@ -43,29 +43,36 @@ func (t *Trade) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (client *PublicClient) GetPast200TradeHistory(currencyPair string) (TradeHistory, error) {
-
-	params := map[string]string{
-		"command":      "returnTradeHistory",
-		"currencyPair": strings.ToUpper(currencyPair),
-	}
-
-	url := buildUrl(params)
-
-	resp, err := client.do("GET", url, "", false)
-	if err != nil {
-		return nil, fmt.Errorf("get: %v", err)
-	}
-
-	res := make(TradeHistory, 200)
-
-	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
-	}
-
-	return res, nil
-}
-
+// Poloniex public API implementation of returnTradeHistory command.
+//
+// API Doc:
+// Returns the past 200 trades for a given market, or up to 50,000 trades between
+// a range specified in UNIX timestamps by the "start" and "end" GET parameters.
+//
+// Call: https://poloniex.com/public?command=returnTradeHistory&currencyPair=BTC_NXT&start=1410158341&end=1410499372
+//
+// Sample output:
+//
+//  [
+//    {
+//      "globalTradeID": 2036467,
+//      "tradeID": 21387,
+//      "date": "2014-09-12 05:21:26",
+//      "type": "buy",
+//      "rate": "0.00008943",
+//      "amount": "1.27241180",
+//      "total": "0.00011379"
+//    },
+//    {
+//      "globalTradeID": 2036466,
+//      "tradeID": 21386,
+//      "date": "2014-09-12 05:21:25",
+//      "type": "buy",
+//      "rate": "0.00008943",
+//      "amount": "1.27241180",
+//      "total": "0.00011379"
+//    }, ...
+//  ]
 func (client *PublicClient) GetTradeHistory(currencyPair string, start, end time.Time) (TradeHistory, error) {
 
 	params := map[string]string{
@@ -83,6 +90,55 @@ func (client *PublicClient) GetTradeHistory(currencyPair string, start, end time
 	}
 
 	var res = make(TradeHistory, 200)
+
+	if err := json.Unmarshal(resp, &res); err != nil {
+		return nil, fmt.Errorf("json unmarshal: %v", err)
+	}
+
+	return res, nil
+}
+
+// GetPast200TradeHistory returns the past 200 trades for a given market (discarding start and end parameters)
+//
+// Call: https://poloniex.com/public?command=returnTradeHistory&currencyPair=BTC_NXT
+//
+// Sample output:
+//
+//  [
+//    {
+//      "globalTradeID": 93370042,
+//      "tradeID": 1013881,
+//      "date": "2017-03-26 02:37:36",
+//      "type": "buy",
+//      "rate": "0.00001343",
+//      "amount": "49.94167793",
+//      "total": "0.00067071"
+//    },
+//    {
+//      "globalTradeID": 93369958,
+//      "tradeID": 1013880,
+//      "date": "2017-03-26 02:37:13",
+//      "type": "sell",
+//      "rate": "0.00001334",
+//      "amount": "33.62895816",
+//      "total": "0.00044861"
+//    }, ...
+//  ]
+func (client *PublicClient) GetPast200TradeHistory(currencyPair string) (TradeHistory, error) {
+
+	params := map[string]string{
+		"command":      "returnTradeHistory",
+		"currencyPair": strings.ToUpper(currencyPair),
+	}
+
+	url := buildUrl(params)
+
+	resp, err := client.do("GET", url, "", false)
+	if err != nil {
+		return nil, fmt.Errorf("get: %v", err)
+	}
+
+	res := make(TradeHistory, 200)
 
 	if err := json.Unmarshal(resp, &res); err != nil {
 		return nil, fmt.Errorf("json unmarshal: %v", err)

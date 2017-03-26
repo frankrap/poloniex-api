@@ -18,6 +18,49 @@ type Currency struct {
 	Frozen         bool
 }
 
+// Poloniex public API implementation of returnCurrencies command.
+//
+// API Doc:
+// Returns information about currencies.
+//
+// Call: https://poloniex.com/public?command=returnCurrencies
+//
+// Sample output:
+//
+//  {
+//    "1CR": {
+//      "id": 1,
+//      "name": "1CRedit",
+//      "txFee": "0.01000000",
+//      "minConf": 3,
+//      "depositAddress": null,
+//      "disabled": 0,
+//      "delisted": 1,
+//      "frozen": 0
+//    }, ...
+//  }
+func (client *PublicClient) GetCurrencies() (Currencies, error) {
+
+	params := map[string]string{
+		"command": "returnCurrencies",
+	}
+
+	url := buildUrl(params)
+
+	resp, err := client.do("GET", url, "", false)
+	if err != nil {
+		return nil, fmt.Errorf("get: %v", err)
+	}
+
+	var res = make(Currencies)
+
+	if err := json.Unmarshal(resp, &res); err != nil {
+		return nil, fmt.Errorf("json unmarshal: %v", err)
+	}
+
+	return res, nil
+}
+
 func (c *Currency) UnmarshalJSON(data []byte) error {
 
 	type alias Currency
@@ -53,26 +96,4 @@ func (c *Currency) UnmarshalJSON(data []byte) error {
 	}
 
 	return nil
-}
-
-func (client *PublicClient) GetCurrencies() (Currencies, error) {
-
-	params := map[string]string{
-		"command": "returnCurrencies",
-	}
-
-	url := buildUrl(params)
-
-	resp, err := client.do("GET", url, "", false)
-	if err != nil {
-		return nil, fmt.Errorf("get: %v", err)
-	}
-
-	var res = make(Currencies)
-
-	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
-	}
-
-	return res, nil
 }

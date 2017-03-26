@@ -21,6 +21,30 @@ type CandleStick struct {
 	WeighedtAverage float64 `json:"weightedAverage"`
 }
 
+// Poloniex public API implementation of returnChartData command.
+//
+// API Doc:
+// Returns candlestick chart data. Required GET parameters are "currencyPair", "period"
+// (candlestick period in seconds; valid values are 300, 900, 1800, 7200, 14400, and 86400),
+// "start", and "end". "Start" and "end" are given in UNIX timestamp format and used to specify
+// the date range for the data returned.
+//
+// Call: https://poloniex.com/public?command=returnChartData&currencyPair=BTC_XMR&start=1405699200&end=9999999999&period=14400
+//
+// Sample output:
+//
+//  [
+//    {
+//      "date":1405699200,
+//      "high":0.0045388,
+//      "low":0.00403001,
+//      "open":0.00404545,
+//      "close":0.00427592,
+//      "volume":44.11655644,
+//      "quoteVolume":10259.29079097,
+//      "weightedAverage":0.00430015
+//    }, ...
+//  ]
 func (client *PublicClient) GetChartData(currencyPair string, start, end time.Time, period int) (ChartData, error) {
 
 	switch period { // Valid period only

@@ -18,6 +18,45 @@ type LoanOrder struct {
 	RangeMax int     `json:"rangeMax"`
 }
 
+// Poloniex public API implementation of returnLoanOrders command.
+//
+// API Doc:
+// Returns the list of loan offers and demands for a given currency,
+// specified by the "currency" GET parameter.
+//
+// Call: https://poloniex.com/public?command=returnLoanOrders&currency=BTC
+//
+// Sample output:
+//
+//  {
+//    "offers": [
+//      {
+//        "rate": "0.00288800",
+//        "amount": "0.49414692",
+//        "rangeMin": 2,
+//        "rangeMax": 2
+//      },
+//      {
+//        "rate": "0.00288900",
+//        "amount": "0.05031184",
+//        "rangeMin": 2,
+//        "rangeMax": 2
+//      }, ...
+//    "demands": [
+//      {
+//        "rate": "0.00200000",
+//        "amount": "0.32648833",
+//        "rangeMin": 2,
+//        "rangeMax": 2
+//      },
+//      {
+//        "rate": "0.00120100",
+//        "amount": "2.49999988",
+//        "rangeMin": 2,
+//        "rangeMax": 2
+//      }, ...
+//    ]
+//  }
 func (client *PublicClient) GetLoanOrders(currency string) (*LoanOrders, error) {
 
 	params := map[string]string{

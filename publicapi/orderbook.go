@@ -21,6 +21,121 @@ type Order struct {
 	Quantity float64
 }
 
+// Poloniex public API implementation of returnOrderBook command.
+//
+// API Doc:
+// Returns the order book for a given market, as well as a sequence number for use with
+// the Push API and an indicator specifying whether the market is frozen. You may set
+// currencyPair to "all" to get the order books of all markets.
+//
+// Call: https://poloniex.com/public?command=returnOrderBook&currencyPair=BTC_NXT&depth=10
+//
+// Sample output:
+//
+//  {
+//    "asks": [
+//      [
+//        "0.00001315",
+//        36937.09233522
+//      ],
+//      [
+//        "0.00001332",
+//        8365.874
+//      ], ...
+//    ],
+//    bids": [
+//      [
+//        "0.00001311",
+//        6006.00485372
+//      ],
+//      [
+//        "0.00001309",
+//        6602.96320483
+//      ], ...
+//    ]
+//    "isFrozen": "0",
+//    "seq": 28233022
+//  }
+func (client *PublicClient) GetOrderBook(currencyPair string, depth int) (*OrderBook, error) {
+
+	params := map[string]string{
+		"command":      "returnOrderBook",
+		"currencyPair": strings.ToUpper(currencyPair),
+		"depth":        strconv.Itoa(depth),
+	}
+
+	url := buildUrl(params)
+
+	resp, err := client.do("GET", url, "", false)
+	if err != nil {
+		return nil, fmt.Errorf("get: %v", err)
+	}
+
+	res := OrderBook{}
+
+	if err := json.Unmarshal(resp, &res); err != nil {
+		return nil, fmt.Errorf("json unmarshal: %v", err)
+	}
+
+	return &res, nil
+}
+
+// GetOrderBooks returns the order books for all markets (currencyPair to "all")
+//
+// Call: https://poloniex.com/public?command=returnOrderBook&currencyPair=ALL&depth=10
+//
+// Sample output:
+//
+//  {
+//    "BTC_AMP": {
+//      "asks": [
+//        [
+//          "0.00006371",
+//          41.23554691
+//        ],
+//        [
+//          "0.00006386",
+//          4071.27563735
+//        ], ...
+//      ]
+//      "bids": [
+//        [
+//          "0.00006356",
+//          54.15144965
+//        ],
+//        [
+//          "0.00006353",
+//          23811.21533134
+//        ], ...
+//      ]
+//      "isFrozen": "0",
+//      "seq": 30446838
+//    }, ...
+//  }
+func (client *PublicClient) GetOrderBooks(depth int) (OrderBooks, error) {
+
+	params := map[string]string{
+		"command":      "returnOrderBook",
+		"currencyPair": "all",
+		"depth":        strconv.Itoa(depth),
+	}
+
+	url := buildUrl(params)
+
+	resp, err := client.do("GET", url, "", false)
+	if err != nil {
+		return nil, fmt.Errorf("get: %v", err)
+	}
+
+	res := make(OrderBooks)
+
+	if err := json.Unmarshal(resp, &res); err != nil {
+		return nil, fmt.Errorf("json unmarshal: %v", err)
+	}
+
+	return res, nil
+}
+
 func (o *OrderBook) UnmarshalJSON(data []byte) error {
 
 	type alias OrderBook
@@ -65,52 +180,4 @@ func (o *Order) UnmarshalJSON(data []byte) error {
 	}
 
 	return nil
-}
-
-func (client *PublicClient) GetOrderBooks(depth int) (OrderBooks, error) {
-
-	params := map[string]string{
-		"command":      "returnOrderBook",
-		"currencyPair": "all",
-		"depth":        strconv.Itoa(depth),
-	}
-
-	url := buildUrl(params)
-
-	resp, err := client.do("GET", url, "", false)
-	if err != nil {
-		return nil, fmt.Errorf("get: %v", err)
-	}
-
-	res := make(OrderBooks)
-
-	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
-	}
-
-	return res, nil
-}
-
-func (client *PublicClient) GetOrderBook(currencyPair string, depth int) (*OrderBook, error) {
-
-	params := map[string]string{
-		"command":      "returnOrderBook",
-		"currencyPair": strings.ToUpper(currencyPair),
-		"depth":        strconv.Itoa(depth),
-	}
-
-	url := buildUrl(params)
-
-	resp, err := client.do("GET", url, "", false)
-	if err != nil {
-		return nil, fmt.Errorf("get: %v", err)
-	}
-
-	res := OrderBook{}
-
-	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
-	}
-
-	return &res, nil
 }

@@ -13,6 +13,52 @@ type DayVolumes struct {
 
 type DayVolume map[string]float64
 
+// Poloniex public API implementation of return24Volume command.
+//
+// API Doc:
+// Returns the 24-hour volume for all markets, plus totals for primary currencies.
+//
+// Call: https://poloniex.com/public?command=return24hVolume
+//
+// Sample output:
+//
+//  {
+//    "BTC_BBR": {
+//      "BTC": "22.86850902",
+//      "BBR": "89588.33257239"
+//    },
+//    "BTC_BCN": {
+//      "BTC": "4.10236135",
+//      "BCN": "89984007.28797383"
+//    }, ...
+//    "totalBTC": "119908.58082298",
+//    "totalETH": "13207.76114161",
+//    "totalUSDT": "23533800.94795309",
+//    "totalXMR": "3675.72265894",
+//    "totalXUSD": "0.00000000"
+//  }
+func (client *PublicClient) GetDayVolumes() (*DayVolumes, error) {
+
+	params := map[string]string{
+		"command": "return24hVolume",
+	}
+
+	url := buildUrl(params)
+
+	resp, err := client.do("GET", url, "", false)
+	if err != nil {
+		return nil, fmt.Errorf("get: %v", err)
+	}
+
+	res := DayVolumes{}
+
+	if err := json.Unmarshal(resp, &res); err != nil {
+		return nil, fmt.Errorf("json unmarshal: %v", err)
+	}
+
+	return &res, nil
+}
+
 func convertToDayVolume(value map[string]interface{}) (DayVolume, error) {
 
 	dv := make(DayVolume)
@@ -63,26 +109,4 @@ func (a *DayVolumes) UnmarshalJSON(data []byte) error {
 	}
 
 	return nil
-}
-
-func (client *PublicClient) GetDayVolumes() (*DayVolumes, error) {
-
-	params := map[string]string{
-		"command": "return24hVolume",
-	}
-
-	url := buildUrl(params)
-
-	resp, err := client.do("GET", url, "", false)
-	if err != nil {
-		return nil, fmt.Errorf("get: %v", err)
-	}
-
-	res := DayVolumes{}
-
-	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
-	}
-
-	return &res, nil
 }

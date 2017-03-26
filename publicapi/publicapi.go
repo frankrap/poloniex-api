@@ -1,3 +1,11 @@
+// Poloniex public API implementation.
+//
+// API Doc: https://poloniex.com/support/api/
+//
+// Please note that making more than 6 calls per second to the public API, or repeatedly and
+// needlessly fetching excessive amounts of data, can result in your IP being banned.
+//
+// There are six public methods, all of which take HTTP GET requests and return output in JSON format.
 package publicapi
 
 import (
@@ -20,18 +28,7 @@ type PublicClient struct {
 	throttle   <-chan time.Time
 }
 
-func buildUrl(params map[string]string) string {
-
-	u := PUBLIC_API_URL + "?"
-
-	var parameters []string
-	for k, v := range params {
-		parameters = append(parameters, k+"="+url.QueryEscape(v))
-	}
-
-	return u + strings.Join(parameters, "&")
-}
-
+// NewPublicClient returns a newly configured client
 func NewPublicClient() *PublicClient {
 
 	reqInterval := 1000 / MAX_REQUEST_PER_SECOND * time.Millisecond
@@ -42,6 +39,7 @@ func NewPublicClient() *PublicClient {
 	return &PublicClient{&client, time.Tick(reqInterval)}
 }
 
+// Do prepares and executes api call requests.
 func (c *PublicClient) do(method, url, payload string, auth bool) ([]byte, error) {
 
 	req, err := http.NewRequest(method, url, strings.NewReader(payload))
@@ -49,9 +47,6 @@ func (c *PublicClient) do(method, url, payload string, auth bool) ([]byte, error
 		return nil, fmt.Errorf("new request: %v", err)
 	}
 
-	if method == "POST" || method == "PUT" {
-		req.Header.Add("Content-Type", "application/json;charset=utf-8")
-	}
 	req.Header.Add("Accept", "application/json")
 
 	type result struct {
@@ -84,18 +79,14 @@ func (c *PublicClient) do(method, url, payload string, auth bool) ([]byte, error
 	return body, nil
 }
 
-// Auth
-// if authNeeded {
-//  if len(c.apiKey) == 0 || len(c.apiSecret) == 0 {
-//      return nil, errors.New("You need to set API Key and API Secret to call this method")
-//  }
-//  nonce := time.Now().UnixNano()
-//  q := req.URL.Query()
-//  q.Set("apikey", c.apiKey)
-//  q.Set("nonce", fmt.Sprintf("%d", nonce))
-//  req.URL.RawQuery = q.Encode()
-//  mac := hmac.New(sha512.New, []byte(c.apiSecret))
-//  _, err = mac.Write([]byte(req.URL.String()))
-//  sig := hex.EncodeToString(mac.Sum(nil))
-//  req.Header.Add("apisign", sig)
-// }
+func buildUrl(params map[string]string) string {
+
+	u := PUBLIC_API_URL + "?"
+
+	var parameters []string
+	for k, v := range params {
+		parameters = append(parameters, k+"="+url.QueryEscape(v))
+	}
+
+	return u + strings.Join(parameters, "&")
+}
