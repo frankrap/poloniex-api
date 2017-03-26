@@ -17,13 +17,26 @@ func main() {
 		log.Fatal(err)
 	}
 
-	printBalances()
+	// printBalances()
+	printCompleteBalances()
 }
 
 // Print balances
 func printBalances() {
 
 	res, err := client.GetBalances()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poloniex.PrettyPrintJson(res)
+}
+
+// Print complete balances
+func printCompleteBalances() {
+
+	res, err := client.GetCompleteBalances()
 
 	if err != nil {
 		log.Fatal(err)
