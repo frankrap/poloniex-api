@@ -82,9 +82,7 @@ func (client *PublicClient) GetTradeHistory(currencyPair string, start, end time
 		"end":          strconv.Itoa(int(end.Unix())),
 	}
 
-	url := buildUrl(params)
-
-	resp, err := client.do("GET", url, "", false)
+	resp, err := client.do(params)
 	if err != nil {
 		return nil, fmt.Errorf("get: %v", err)
 	}
@@ -131,9 +129,7 @@ func (client *PublicClient) GetPast200TradeHistory(currencyPair string) (TradeHi
 		"currencyPair": strings.ToUpper(currencyPair),
 	}
 
-	url := buildUrl(params)
-
-	resp, err := client.do("GET", url, "", false)
+	resp, err := client.do(params)
 	if err != nil {
 		return nil, fmt.Errorf("get: %v", err)
 	}

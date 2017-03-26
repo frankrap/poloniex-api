@@ -66,9 +66,7 @@ func (client *PublicClient) GetChartData(currencyPair string, start, end time.Ti
 		"period":       strconv.Itoa(period),
 	}
 
-	url := buildUrl(params)
-
-	resp, err := client.do("GET", url, "", false)
+	resp, err := client.do(params)
 	if err != nil {
 		return nil, fmt.Errorf("get: %v", err)
 	}

@@ -64,9 +64,7 @@ func (client *PublicClient) GetOrderBook(currencyPair string, depth int) (*Order
 		"depth":        strconv.Itoa(depth),
 	}
 
-	url := buildUrl(params)
-
-	resp, err := client.do("GET", url, "", false)
+	resp, err := client.do(params)
 	if err != nil {
 		return nil, fmt.Errorf("get: %v", err)
 	}
@@ -120,9 +118,7 @@ func (client *PublicClient) GetOrderBooks(depth int) (OrderBooks, error) {
 		"depth":        strconv.Itoa(depth),
 	}
 
-	url := buildUrl(params)
-
-	resp, err := client.do("GET", url, "", false)
+	resp, err := client.do(params)
 	if err != nil {
 		return nil, fmt.Errorf("get: %v", err)
 	}

@@ -64,9 +64,7 @@ func (client *PublicClient) GetLoanOrders(currency string) (*LoanOrders, error) 
 		"currency": strings.ToUpper(currency),
 	}
 
-	url := buildUrl(params)
-
-	resp, err := client.do("GET", url, "", false)
+	resp, err := client.do(params)
 	if err != nil {
 		return nil, fmt.Errorf("get: %v", err)
 	}

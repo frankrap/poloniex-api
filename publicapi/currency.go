@@ -45,9 +45,7 @@ func (client *PublicClient) GetCurrencies() (Currencies, error) {
 		"command": "returnCurrencies",
 	}
 
-	url := buildUrl(params)
-
-	resp, err := client.do("GET", url, "", false)
+	resp, err := client.do(params)
 	if err != nil {
 		return nil, fmt.Errorf("get: %v", err)
 	}

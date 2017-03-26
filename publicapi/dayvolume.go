@@ -43,9 +43,7 @@ func (client *PublicClient) GetDayVolumes() (*DayVolumes, error) {
 		"command": "return24hVolume",
 	}
 
-	url := buildUrl(params)
-
-	resp, err := client.do("GET", url, "", false)
+	resp, err := client.do(params)
 	if err != nil {
 		return nil, fmt.Errorf("get: %v", err)
 	}

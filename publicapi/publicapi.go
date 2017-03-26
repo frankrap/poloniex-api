@@ -1,6 +1,6 @@
 // Poloniex public API implementation.
 //
-// API Doc: https://poloniex.com/support/api/
+// API Doc: https://poloniex.com/support/api
 //
 // Please note that making more than 6 calls per second to the public API, or repeatedly and
 // needlessly fetching excessive amounts of data, can result in your IP being banned.
@@ -40,9 +40,11 @@ func NewPublicClient() *PublicClient {
 }
 
 // Do prepares and executes api call requests.
-func (c *PublicClient) do(method, url, payload string, auth bool) ([]byte, error) {
+func (c *PublicClient) do(params map[string]string) ([]byte, error) {
 
-	req, err := http.NewRequest(method, url, strings.NewReader(payload))
+	url := buildUrl(params)
+
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("new request: %v", err)
 	}
