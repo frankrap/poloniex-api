@@ -25,7 +25,9 @@ func main() {
 	// GenerateNewAddress()
 	// printDepositsWithdrawals()
 	// printOpenOrders()
-	printAllOpenOrders()
+	// printAllOpenOrders()
+	// printTradeHistory()
+	printAllTradeHistory()
 }
 
 // Print balances
@@ -108,6 +110,34 @@ func printOpenOrders() {
 func printAllOpenOrders() {
 
 	res, err := client.GetAllOpenOrders()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poloniex.PrettyPrintJson(res)
+}
+
+// Print BTC_STEEM trade history that happened the last 20 days
+func printTradeHistory() {
+
+	end := time.Now()
+	start := end.Add(-20 * 24 * time.Hour)
+	res, err := client.GetTradeHistory("BTC_STEEM", start, end)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poloniex.PrettyPrintJson(res)
+}
+
+// Print trade history for all markets that happened the last 20 days
+func printAllTradeHistory() {
+
+	end := time.Now()
+	start := end.Add(-20 * 24 * time.Hour)
+	res, err := client.GetAllTradeHistory(start, end)
 
 	if err != nil {
 		log.Fatal(err)

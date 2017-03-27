@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"time"
 )
 
 type OpenOrders []OpenOrder
@@ -15,7 +16,7 @@ type OpenOrder struct {
 	StartingAmount float64 `json:"startingAmount,string"`
 	Amount         float64 `json:"Amount,string"`
 	Total          float64 `json:"Total,string"`
-	Date           string  `json:"date"`
+	Date           int64   // Unix timestamp
 	Margin         int     `json:"margin"`
 }
 
@@ -29,24 +30,28 @@ type AllOpenOrders map[string]OpenOrders
 // orders for all markets.
 //
 // Sample output for single market:
+//
 //  [
 //    {
-//      "orderNumber": "120466",
-//      "type": "sell",
-//      "rate": "0.025",
-//      "startingAmount: 0.025"
-//      "amount": "100",
-//      "total": "2.5"
-//      "date": "2017-03-27 04:21:57"
+//      "orderNumber": "258029798062",
+//      "type": "buy",
+//      "rate": "0.0048671",
+//      "startingAmount": "0.1",
+//      "Amount": "0.1",
+//      "Total": "0.00048671",
+//      "date": "2017-03-27 16:46:16",
 //      "margin": 0
-//     },
-//     {
-//       "orderNumber": "120467",
-//       "type": "sell",
-//       "rate": "0.04",
-//       "amount": "100",
-//       "total": "4"
-//     }, ...
+//    },
+//    {
+//      "orderNumber": "258029833027",
+//      "type": "buy",
+//      "rate": "0.0048671",
+//      "startingAmount": "0.1",
+//      "Amount": "0.1",
+//      "Total": "0.00048671",
+//      "date": "2017-03-27 16:46:21",
+//      "margin": 0
+//    }, ...
 //  ]
 func (client *TradingClient) GetOpenOrders(currencyPair string) (*OpenOrders, error) {
 
@@ -71,17 +76,28 @@ func (client *TradingClient) GetOpenOrders(currencyPair string) (*OpenOrders, er
 // GetAllOpenOrders returns the open orders for all markets (currencyPair to "all")
 //
 // Sample output:
+//
 //  {
 //    "BTC_ETC": [],
 //    "BTC_ETH": [
 //      {
-//        "orderNumber": "257744844301",
+//        "orderNumber": "258029798062",
 //        "type": "buy",
-//        "rate": "0.02",
+//        "rate": "0.0048671",
 //        "startingAmount": "0.1",
 //        "Amount": "0.1",
-//        "Total": "0.002",
-//        "date": "2017-03-27 04:25:42",
+//        "Total": "0.00048671",
+//        "date": "2017-03-27 16:46:16",
+//        "margin": 0
+//      },
+//      {
+//        "orderNumber": "258029833027",
+//        "type": "buy",
+//        "rate": "0.0048671",
+//        "startingAmount": "0.1",
+//        "Amount": "0.1",
+//        "Total": "0.00048671",
+//        "date": "2017-03-27 16:46:21",
 //        "margin": 0
 //      }, ...
 //    ], ...
@@ -104,4 +120,27 @@ func (client *TradingClient) GetAllOpenOrders() (AllOpenOrders, error) {
 	}
 
 	return res, nil
+}
+
+func (o *OpenOrder) UnmarshalJSON(data []byte) error {
+
+	type alias OpenOrder
+	aux := struct {
+		Date string `json:"Date"`
+		*alias
+	}{
+		alias: (*alias)(o),
+	}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return fmt.Errorf("unmarshal aux: %v", err)
+	}
+
+	if timestamp, err := time.Parse("2006-01-02 15:04:05", aux.Date); err != nil {
+		return fmt.Errorf("timestamp conversion: %v", err)
+	} else {
+		o.Date = int64(timestamp.Unix())
+	}
+
+	return nil
 }
