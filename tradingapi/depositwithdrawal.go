@@ -33,9 +33,6 @@ type Withdrawal struct {
 	IpAddress        string  `json:"ipAddress"`
 }
 
-type Withdrawals struct {
-}
-
 // Poloniex trading API implementation of returnDepositsWithdrawals command.
 //
 // API Doc:
@@ -59,13 +56,13 @@ type Withdrawals struct {
 //    ],
 //    "withdrawals": [
 //      {
-//        "withdrawalNumber":134933,
-//        "currency":"BTC",
-//        "address":"1N2i5n8DwTGzUq2Vmn9TUL8J1vdr1XBDFg",
-//        "amount":"5.00010000",
-//        "timestamp":1399267904,
-//        "status":"COMPLETE: 36e483efa6aff9fd53a235177579d98451c4eb237c210e66cd2b9a2d4a988f8e",
-//        "ipAddress":"100.100.100.100"
+//        "withdrawalNumber": 134933,
+//        "currency": "BTC",
+//        "address": "1N2i5n8DwTGzUq2Vmn9TUL8J1vdr1XBDFg",
+//        "amount": "5.00010000",
+//        "timestamp": 1399267904,
+//        "status": "COMPLETE: 36e483efa6aff9fd53a235177579d98451c4eb237c210e66cd2b9a2d4a988f8e",
+//        "ipAddress": "100.100.100.100"
 //      }, ...
 //    ]
 //  }

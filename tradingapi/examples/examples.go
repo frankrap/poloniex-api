@@ -23,7 +23,9 @@ func main() {
 	// printCompleteBalances()
 	// printDepositAddresses()
 	// GenerateNewAddress()
-	printDepositsWithdrawals()
+	// printDepositsWithdrawals()
+	// printOpenOrders()
+	printAllOpenOrders()
 }
 
 // Print balances
@@ -82,6 +84,30 @@ func printDepositsWithdrawals() {
 	end := time.Now()
 	start := end.Add(-20 * 24 * time.Hour)
 	res, err := client.GetDepositsWithdrawals(start, end)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poloniex.PrettyPrintJson(res)
+}
+
+// Print open orders for BTC_STEEM market
+func printOpenOrders() {
+
+	res, err := client.GetOpenOrders("BTC_ETH")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poloniex.PrettyPrintJson(res)
+}
+
+// Print open orders for all markets
+func printAllOpenOrders() {
+
+	res, err := client.GetAllOpenOrders()
 
 	if err != nil {
 		log.Fatal(err)

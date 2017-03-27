@@ -35,14 +35,14 @@ type CandleStick struct {
 //
 //  [
 //    {
-//      "date":1405699200,
-//      "high":0.0045388,
-//      "low":0.00403001,
-//      "open":0.00404545,
-//      "close":0.00427592,
-//      "volume":44.11655644,
-//      "quoteVolume":10259.29079097,
-//      "weightedAverage":0.00430015
+//      "date": 1405699200,
+//      "high": 0.0045388,
+//      "low": 0.00403001,
+//      "open": 0.00404545,
+//      "close": 0.00427592,
+//      "volume": 44.11655644,
+//      "quoteVolume": 10259.29079097,
+//      "weightedAverage": 0.00430015
 //    }, ...
 //  ]
 func (client *PublicClient) GetChartData(currencyPair string, start, end time.Time, period int) (ChartData, error) {
