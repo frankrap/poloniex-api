@@ -53,6 +53,10 @@ type TradingClient struct {
 	throttle   <-chan time.Time
 }
 
+type APIError struct {
+	Err string `json:"error"`
+}
+
 // NewTradingClient returns a newly configured client
 func NewTradingClient(apiKey, apiSecret string) (*TradingClient, error) {
 
@@ -121,27 +125,26 @@ func (c *TradingClient) do(form url.Values) ([]byte, error) {
 	}
 
 	if res.resp.StatusCode != 200 {
-		return body, formatError(nil, res.resp.Status)
+		return body, fmt.Errorf("status code: %s", res.resp.Status)
+	}
+
+	if err := checkAPIError(body); err != nil {
+		return nil, err
 	}
 
 	return body, nil
 }
 
-func formatError(body []byte, status string) error {
+func checkAPIError(body []byte) error {
 
-	type APIError struct {
-		Err string `json:"error"`
-	}
 	ae := APIError{}
 
-	if err := json.Unmarshal(body, &ae); err != nil {
+	if err := json.Unmarshal(body, &ae); err == nil {
+		return fmt.Errorf("API error: %s", ae.Err)
 
-		jsonError := fmt.Sprintf("json unmarshal error: %v", err)
-		return fmt.Errorf("%s (status code: %s)", jsonError, status)
-
-	} else {
-		return fmt.Errorf("%s (status code: %s)", ae.Err, status)
 	}
+
+	return nil
 }
 
 func signForm(form url.Values, apiSecret string) (string, error) {

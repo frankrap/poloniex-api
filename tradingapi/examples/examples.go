@@ -27,7 +27,8 @@ func main() {
 	// printOpenOrders()
 	// printAllOpenOrders()
 	// printTradeHistory()
-	printAllTradeHistory()
+	// printAllTradeHistory()
+	printTradesFromOrder()
 }
 
 // Print balances
@@ -138,6 +139,18 @@ func printAllTradeHistory() {
 	end := time.Now()
 	start := end.Add(-20 * 24 * time.Hour)
 	res, err := client.GetAllTradeHistory(start, end)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poloniex.PrettyPrintJson(res)
+}
+
+// Print trade for a given orderId
+func printTradesFromOrder() {
+
+	res, err := client.GetTradesFromOrder(22685911548)
 
 	if err != nil {
 		log.Fatal(err)

@@ -11,8 +11,8 @@ import (
 type TradeHistory []Trade
 
 type Trade struct {
-	GlobalTradeId int     `json:"globalTradeID"`
-	TradeId       int     `json:"tradeID,string"`
+	GlobalTradeId int64   `json:"globalTradeID"`
+	TradeId       int64   `json:"tradeID,string"`
 	Date          int64   // Unix timestamp
 	Rate          float64 `json:"rate,string"`
 	Amount        float64 `json:"amount,string"`
@@ -33,7 +33,7 @@ type AllTradeHistory map[string]TradeHistory
 // may optionally specify a range via "start" and/or "end" POST parameters, given in UNIX
 // timestamp format; if you do not specify a range, it will be limited to one day.
 //
-// Sample output for single market:
+// Sample output:
 //
 //  [
 //    {
@@ -74,7 +74,6 @@ func (client *TradingClient) GetTradeHistory(currencyPair string, start, end tim
 		return nil, fmt.Errorf("do: %v", err)
 	}
 
-	fmt.Printf("%#v\n", string(resp))
 	res := make(TradeHistory, 0)
 
 	if err := json.Unmarshal(resp, &res); err != nil {
@@ -86,7 +85,7 @@ func (client *TradingClient) GetTradeHistory(currencyPair string, start, end tim
 
 // GetAllOpenOrders returns the open orders for all markets (currencyPair to "all")
 //
-// Sample output for single market:
+// Sample output:
 //
 //  { "BTC_ETH": [
 //      {
