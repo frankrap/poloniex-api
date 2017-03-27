@@ -23,7 +23,7 @@ type Balances map[string]float64
 func (client *TradingClient) GetBalances() (Balances, error) {
 
 	postParameters := url.Values{}
-	postParameters.Add("command", "returnDepositAddresses")
+	postParameters.Add("command", "returnBalances")
 
 	resp, err := client.do(postParameters)
 	if err != nil {

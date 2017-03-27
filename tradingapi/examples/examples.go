@@ -5,6 +5,7 @@ import (
 	"log"
 	"poloniex"
 	"poloniex/tradingapi"
+	"time"
 )
 
 var client *tradingapi.TradingClient
@@ -20,8 +21,9 @@ func main() {
 
 	// printBalances()
 	// printCompleteBalances()
-	printDepositAddresses()
-	GenerateNewAddress()
+	// printDepositAddresses()
+	// GenerateNewAddress()
+	printDepositsWithdrawals()
 }
 
 // Print balances
@@ -72,4 +74,18 @@ func GenerateNewAddress() {
 
 	toPrint := fmt.Sprintf("New address generated (%s): %s", currency, addr)
 	poloniex.PrettyPrintJson(toPrint)
+}
+
+// Print deposits and withdrawals that happened the last 20 days
+func printDepositsWithdrawals() {
+
+	end := time.Now()
+	start := end.Add(-20 * 24 * time.Hour)
+	res, err := client.GetDepositsWithdrawals(start, end)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poloniex.PrettyPrintJson(res)
 }
