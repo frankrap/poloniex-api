@@ -137,8 +137,11 @@ func (c *TradingClient) do(form url.Values) ([]byte, error) {
 
 func checkAPIError(body []byte) error {
 
-	ae := APIError{}
+	if !strings.Contains(string(body), "\"error\":") {
+		return nil
+	}
 
+	ae := APIError{}
 	if err := json.Unmarshal(body, &ae); err == nil {
 		return fmt.Errorf("API error: %s", ae.Err)
 
