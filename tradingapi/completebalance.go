@@ -3,6 +3,7 @@ package tradingapi
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 )
 
 type CompleteBalances map[string]CompleteBalance
@@ -32,7 +33,10 @@ type CompleteBalance struct {
 //  }
 func (client *TradingClient) GetCompleteBalances() (CompleteBalances, error) {
 
-	resp, err := client.do("returnCompleteBalances")
+	postParameters := url.Values{}
+	postParameters.Add("command", "returnCompleteBalances")
+
+	resp, err := client.do(postParameters)
 	if err != nil {
 		return nil, fmt.Errorf("do: %v", err)
 	}

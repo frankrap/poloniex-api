@@ -67,6 +67,7 @@ func (c *PublicClient) do(params map[string]string) ([]byte, error) {
 	if res.err != nil {
 		return nil, fmt.Errorf("request: %v", res.err)
 	}
+
 	defer res.resp.Body.Close()
 
 	body, err := ioutil.ReadAll(res.resp.Body)

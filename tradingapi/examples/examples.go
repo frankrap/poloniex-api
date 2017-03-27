@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"poloniex"
 	"poloniex/tradingapi"
@@ -18,7 +19,9 @@ func main() {
 	}
 
 	// printBalances()
-	printCompleteBalances()
+	// printCompleteBalances()
+	printDepositAddresses()
+	GenerateNewAddress()
 }
 
 // Print balances
@@ -43,4 +46,30 @@ func printCompleteBalances() {
 	}
 
 	poloniex.PrettyPrintJson(res)
+}
+
+// Print deposit addresses
+func printDepositAddresses() {
+
+	res, err := client.GetDepositAddresses()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poloniex.PrettyPrintJson(res)
+}
+
+// Generate new address for currency BTC
+func GenerateNewAddress() {
+
+	currency := "BTC"
+	addr, err := client.GenerateNewAddress(currency)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	toPrint := fmt.Sprintf("New address generated (%s): %s", currency, addr)
+	poloniex.PrettyPrintJson(toPrint)
 }

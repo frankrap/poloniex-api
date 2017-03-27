@@ -3,6 +3,7 @@ package tradingapi
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"strconv"
 )
 
@@ -21,7 +22,10 @@ type Balances map[string]float64
 //  }
 func (client *TradingClient) GetBalances() (Balances, error) {
 
-	resp, err := client.do("returnBalances")
+	postParameters := url.Values{}
+	postParameters.Add("command", "returnDepositAddresses")
+
+	resp, err := client.do(postParameters)
 	if err != nil {
 		return nil, fmt.Errorf("do: %v", err)
 	}

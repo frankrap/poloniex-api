@@ -76,12 +76,10 @@ func NewTradingClient(apiKey, apiSecret string) (*TradingClient, error) {
 }
 
 // Do prepares and executes api call requests.
-func (c *TradingClient) do(command string) ([]byte, error) {
+func (c *TradingClient) do(form url.Values) ([]byte, error) {
 
-	form := url.Values{}
 	nonce := time.Now().UnixNano()
 	form.Add("nonce", strconv.Itoa(int(nonce)))
-	form.Add("command", command)
 
 	req, err := http.NewRequest("POST", TRADING_API_URL, strings.NewReader(form.Encode()))
 	if err != nil {
@@ -114,6 +112,7 @@ func (c *TradingClient) do(command string) ([]byte, error) {
 	if res.err != nil {
 		return nil, fmt.Errorf("request: %v", res.err)
 	}
+
 	defer res.resp.Body.Close()
 
 	body, err := ioutil.ReadAll(res.resp.Body)
@@ -122,7 +121,7 @@ func (c *TradingClient) do(command string) ([]byte, error) {
 	}
 
 	if res.resp.StatusCode != 200 {
-		return nil, formatError(body, res.resp.Status)
+		return body, formatError(nil, res.resp.Status)
 	}
 
 	return body, nil
