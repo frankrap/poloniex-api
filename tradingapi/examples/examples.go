@@ -29,10 +29,14 @@ func main() {
 	// printTradeHistory()
 	// printAllTradeHistory()
 	// printTradesFromOrder()
-	buy()
+	// buy()
 	// buyFillOrKill()
 	// buyImmediateOrCancel()
 	// buyPostOnly()
+	// sell()
+	sellFillOrKill()
+	// sellImmediateOrCancel()
+	// sellPostOnly()
 }
 
 // Print balances
@@ -208,6 +212,58 @@ func buyPostOnly() {
 
 	rate, amount := 0.011, 0.01
 	res, err := client.BuyPostOnly("BTC_ETH", rate, amount)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poloniex.PrettyPrintJson(res)
+}
+
+// Place a sell order for 0.01 eth at 0.011btc
+func sell() {
+
+	rate, amount := 0.011, 0.01
+	res, err := client.Sell("BTC_ETH", rate, amount)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poloniex.PrettyPrintJson(res)
+}
+
+// Place a sell (fill or kill) order for 0.01 eth at 0.011btc
+func sellFillOrKill() {
+
+	rate, amount := 0.011, 0.01
+	res, err := client.SellFillOrKill("BTC_ETH", rate, amount)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poloniex.PrettyPrintJson(res)
+}
+
+// Place a sell (immediate or cancel) order for 0.01 eth at 0.011btc
+func sellImmediateOrCancel() {
+
+	rate, amount := 0.011, 0.01
+	res, err := client.SellImmediateOrCancel("BTC_ETH", rate, amount)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poloniex.PrettyPrintJson(res)
+}
+
+// Place a sell order (post only) for 0.01 eth at 0.011btc
+func sellPostOnly() {
+
+	rate, amount := 0.011, 0.01
+	res, err := client.SellPostOnly("BTC_ETH", rate, amount)
 
 	if err != nil {
 		log.Fatal(err)
