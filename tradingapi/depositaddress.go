@@ -28,7 +28,7 @@ func (client *TradingClient) GetDepositAddresses() (DepositAddresses, error) {
 		return nil, fmt.Errorf("do: %v", err)
 	}
 
-	var res = make(DepositAddresses)
+	res := make(DepositAddresses)
 
 	if err := json.Unmarshal(resp, &res); err != nil {
 		return nil, fmt.Errorf("json unmarshal: %v", err)

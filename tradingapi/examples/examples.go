@@ -38,8 +38,9 @@ func main() {
 	// sellImmediateOrCancel()
 	// sellPostOnly()
 	// cancelOrder()
-
-	printFeeInfo()
+	// printAvailableAccountBalances()
+	printAccountBalances()
+	// printFeeInfo()
 }
 
 // Print balances
@@ -280,6 +281,31 @@ func cancelOrder() {
 
 	var orderNumber int64 = 258148121620
 	res, err := client.CancelOrder(orderNumber)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poloniex.PrettyPrintJson(res)
+}
+
+// Print available account balances
+func printAvailableAccountBalances() {
+
+	res, err := client.GetAvailableAccountBalances()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poloniex.PrettyPrintJson(res)
+}
+
+// Print account balances
+func printAccountBalances() {
+
+	account := "exchange"
+	res, err := client.GetAccountBalances(account)
 
 	if err != nil {
 		log.Fatal(err)

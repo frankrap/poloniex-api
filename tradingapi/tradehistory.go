@@ -18,7 +18,7 @@ type Trade struct {
 	Amount        float64 `json:"amount,string"`
 	Total         float64 `json:"total,string"`
 	Fee           float64 `json:"fee,string"`
-	OrderNumber   int     `json:"orderNumber,string"`
+	OrderNumber   int64   `json:"orderNumber,string"`
 	TypeOrder     string  `json:"type"`
 	Category      string  `json:"category"`
 }

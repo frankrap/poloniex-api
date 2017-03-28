@@ -37,7 +37,7 @@ func (client *TradingClient) GetFeeInfo() (*FeeInfo, error) {
 		return nil, fmt.Errorf("do: %v", err)
 	}
 
-	var res = FeeInfo{}
+	res := FeeInfo{}
 
 	if err := json.Unmarshal(resp, &res); err != nil {
 		return nil, fmt.Errorf("json unmarshal: %v", err)
