@@ -38,9 +38,12 @@ func main() {
 	// sellImmediateOrCancel()
 	// sellPostOnly()
 	// cancelOrder()
-	// printAvailableAccountBalances()
-	printAccountBalances()
+	//TODO move order
+	//TODO withdraw
 	// printFeeInfo()
+	// printAvailableAccountBalances()
+	// printAccountBalances()
+	printTradableBalances()
 }
 
 // Print balances
@@ -318,6 +321,18 @@ func printAccountBalances() {
 func printFeeInfo() {
 
 	res, err := client.GetFeeInfo()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poloniex.PrettyPrintJson(res)
+}
+
+// Print tradable balances
+func printTradableBalances() {
+
+	res, err := client.GetTradableBalances()
 
 	if err != nil {
 		log.Fatal(err)
