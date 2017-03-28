@@ -41,11 +41,32 @@ func main() {
 	// moveOrder()
 	// moveOrderPostOnly()
 	// moveOrderImmediateOrCancel()
-	//TODO withdraw
+	// withdraw()
+	// withdrawWithPaymentId()
 	// printFeeInfo()
 	// printAvailableAccountBalances()
 	// printAccountBalances()
 	// printTradableBalances()
+
+	/*
+
+	   TODO Margin & Lending api calls
+
+	   returnTradableBalances
+	   transferBalance
+	   returnMarginAccountSummary
+	   marginBuy
+	   marginSell
+	   getMarginPosition
+	   closeMarginPosition
+	   createLoanOffer
+	   cancelLoanOffer
+	   returnOpenLoanOffers
+	   returnActiveLoans
+	   returnLendingHistory
+	   toggleAutoRenew
+
+	*/
 }
 
 // Print balances
@@ -353,6 +374,31 @@ func printAccountBalances() {
 
 	account := "exchange"
 	res, err := client.GetAccountBalances(account)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poloniex.PrettyPrintJson(res)
+}
+
+// Withdraw 0.2 XRP to address
+func withdraw() {
+	res, err := client.Withdraw("XRP", 0.2, "rPVMhWBsfF9iMXYj3aAzJVkPDTFNSyWdKy")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poloniex.PrettyPrintJson(res)
+}
+
+// Withdraw 0.1 XMR to address & paymentId
+func withdrawWithPaymentId() {
+
+	address := "463tWEBn5XZJSxLU6uLQnQ2iY9xuNcDbjLSjkn3XAXHCbLrTTErJrBWYgHJQyrCwkNgYvyV3z8zctJLPCZy24jvb3NiTcTJ"
+	paymentId := "c03df18a7b184a679c9b40f5d8f45a096dce5d2e0bf84698b8aba699138a2a79"
+	res, err := client.WithdrawWithPaymentId("XMR", 0.1, address, paymentId)
 
 	if err != nil {
 		log.Fatal(err)

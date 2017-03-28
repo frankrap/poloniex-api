@@ -9,11 +9,11 @@ import (
 )
 
 type DepositsWithdrawals struct {
-	Deposits    []Deposit
-	Withdrawals []Withdrawal
+	Deposits    []DepositHistory
+	Withdrawals []WithdrawalHistory
 }
 
-type Deposit struct {
+type DepositHistory struct {
 	Currency      string  `json:"currency"`
 	Address       string  `json:"address"`
 	Amount        float64 `json:"amount,string"`
@@ -23,7 +23,7 @@ type Deposit struct {
 	Status        string  `json:"status"`
 }
 
-type Withdrawal struct {
+type WithdrawalHistory struct {
 	WithdrawalNumber int64   `json:"withdrawalNumber"`
 	Currency         string  `json:"currency"`
 	Address          string  `json:"address"`
@@ -39,7 +39,7 @@ type Withdrawal struct {
 // Returns your deposit and withdrawal history within a range, specified by the "start"
 // and "end" POST parameters, both of which should be given as UNIX timestamps.
 //
-// Withdrawals status: "COMPLETE: txid" || "PENDING"
+// Withdrawals status: "COMPLETE" || "COMPLETE: ERROR" || "COMPLETE: txid" || "PENDING"
 //
 // Sample output:
 //  {
