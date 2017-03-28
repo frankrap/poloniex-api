@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"poloniex"
 	"strconv"
-	"time"
 )
 
 // Poloniex trading API implementation of buy and sell command.
@@ -38,18 +38,9 @@ import (
 //    amountUnfilled: "332.23"
 //  }
 type BuyOrSellOrder struct {
-	OrderNumber     int64            `json:"orderNumber,string"`
-	ResultingTrades []ResultingTrade `json:"resultingTrades"`
-	AmountUnfilled  float64          `json:"amountUnfilled,string"` // Only for ImmediateOrCancel option
-}
-
-type ResultingTrade struct {
-	Amount    float64 `json:"amount,string"`
-	Date      int64   // Unix timestamp
-	Rate      float64 `json:"rate,string"`
-	Total     float64 `json:"total,string"`
-	TradeId   int64   `json:"tradeID,string"`
-	TypeOrder string  `json:"type"`
+	OrderNumber     int64                     `json:"orderNumber,string"`
+	ResultingTrades []poloniex.ResultingTrade `json:"resultingTrades"`
+	AmountUnfilled  float64                   `json:"amountUnfilled,string"` // Only for ImmediateOrCancel option
 }
 
 func (client *TradingClient) BuyFillOrKill(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
@@ -108,27 +99,4 @@ func (client *TradingClient) buyOrSell(command, currencyPair string, rate, amoun
 	}
 
 	return &res, nil
-}
-
-func (r *ResultingTrade) UnmarshalJSON(data []byte) error {
-
-	type alias ResultingTrade
-	aux := struct {
-		Date string `json:"Date"`
-		*alias
-	}{
-		alias: (*alias)(r),
-	}
-
-	if err := json.Unmarshal(data, &aux); err != nil {
-		return fmt.Errorf("unmarshal aux: %v", err)
-	}
-
-	if timestamp, err := time.Parse("2006-01-02 15:04:05", aux.Date); err != nil {
-		return fmt.Errorf("timestamp conversion: %v", err)
-	} else {
-		r.Date = int64(timestamp.Unix())
-	}
-
-	return nil
 }

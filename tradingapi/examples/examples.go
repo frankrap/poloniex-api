@@ -38,12 +38,14 @@ func main() {
 	// sellImmediateOrCancel()
 	// sellPostOnly()
 	// cancelOrder()
-	//TODO move order
+	// moveOrder()
+	// moveOrderPostOnly()
+	// moveOrderImmediateOrCancel()
 	//TODO withdraw
 	// printFeeInfo()
 	// printAvailableAccountBalances()
 	// printAccountBalances()
-	printTradableBalances()
+	// printTradableBalances()
 }
 
 // Print balances
@@ -134,12 +136,12 @@ func printAllOpenOrders() {
 	poloniex.PrettyPrintJson(res)
 }
 
-// Print BTC_STEEM trade history that happened the last 20 days
+// Print BTC_ETH trade history that happened the last 20 days
 func printTradeHistory() {
 
 	end := time.Now()
 	start := end.Add(-20 * 24 * time.Hour)
-	res, err := client.GetTradeHistory("BTC_STEEM", start, end)
+	res, err := client.GetTradeHistory("BTC_ETH", start, end)
 
 	if err != nil {
 		log.Fatal(err)
@@ -178,7 +180,7 @@ func printTradesFromOrder() {
 // Place a buy order for 0.01 eth at 0.011btc
 func buy() {
 
-	rate, amount := 0.02, 0.01
+	rate, amount := 0.01, 0.01
 	res, err := client.Buy("BTC_ETH", rate, amount)
 
 	if err != nil {
@@ -284,6 +286,48 @@ func cancelOrder() {
 
 	var orderNumber int64 = 258148121620
 	res, err := client.CancelOrder(orderNumber)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poloniex.PrettyPrintJson(res)
+}
+
+// Move order 258562801525 at rate 0.011 and amount 0.01
+func moveOrder() {
+
+	var orderNumber int64 = 258562801525
+	rate, amount := 0.011, 0.01
+	res, err := client.MoveOrder(orderNumber, rate, amount)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poloniex.PrettyPrintJson(res)
+}
+
+// Move order (post only) 258562801525 at rate 0.011 and amount 0.01
+func moveOrderPostOnly() {
+
+	var orderNumber int64 = 258562801525
+	rate, amount := 0.01, 0.01
+	res, err := client.MoveOrderPostOnly(orderNumber, rate, amount)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	poloniex.PrettyPrintJson(res)
+}
+
+// Move order (immediate or cancel) 258577048264 at rate 0.0112 and amount 0.012
+func moveOrderImmediateOrCancel() {
+
+	var orderNumber int64 = 258577048264
+	rate, amount := 0.0112, 0.012
+	res, err := client.MoveOrderImmediateOrCancel(orderNumber, rate, amount)
 
 	if err != nil {
 		log.Fatal(err)
