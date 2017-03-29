@@ -61,13 +61,13 @@ func (client *TradingClient) GetOpenOrders(currencyPair string) (*OpenOrders, er
 
 	resp, err := client.do(postParameters)
 	if err != nil {
-		return nil, fmt.Errorf("do: %v", err)
+		return nil, fmt.Errorf("TradingClient.do: %v", err)
 	}
 
 	res := OpenOrders{}
 
 	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
+		return nil, fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	return &res, nil
@@ -116,7 +116,7 @@ func (client *TradingClient) GetAllOpenOrders() (AllOpenOrders, error) {
 	res := make(AllOpenOrders)
 
 	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
+		return nil, fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	return res, nil
@@ -133,11 +133,11 @@ func (o *OpenOrder) UnmarshalJSON(data []byte) error {
 	}
 
 	if err := json.Unmarshal(data, &aux); err != nil {
-		return fmt.Errorf("unmarshal aux: %v", err)
+		return fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	if timestamp, err := time.Parse("2006-01-02 15:04:05", aux.Date); err != nil {
-		return fmt.Errorf("timestamp conversion: %v", err)
+		return fmt.Errorf("time.Parse: %v", err)
 	} else {
 		o.Date = int64(timestamp.Unix())
 	}

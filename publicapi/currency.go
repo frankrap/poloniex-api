@@ -47,13 +47,13 @@ func (client *PublicClient) GetCurrencies() (Currencies, error) {
 
 	resp, err := client.do(params)
 	if err != nil {
-		return nil, fmt.Errorf("get: %v", err)
+		return nil, fmt.Errorf("PublicClient.do: %v", err)
 	}
 
 	var res = make(Currencies)
 
 	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
+		return nil, fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	return res, nil
@@ -72,7 +72,7 @@ func (c *Currency) UnmarshalJSON(data []byte) error {
 	}
 
 	if err := json.Unmarshal(data, &aux); err != nil {
-		return fmt.Errorf("unmarshal aux: %v", err)
+		return fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	if aux.Disabled != 0 {

@@ -89,13 +89,13 @@ func (client *TradingClient) buyOrSell(command, currencyPair string, rate, amoun
 
 	resp, err := client.do(postParameters)
 	if err != nil {
-		return nil, fmt.Errorf("do: %v", err)
+		return nil, fmt.Errorf("TradingClient.do: %v", err)
 	}
 
 	res := BuyOrSellOrder{}
 
 	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
+		return nil, fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	return &res, nil

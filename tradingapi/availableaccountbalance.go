@@ -47,13 +47,13 @@ func (client *TradingClient) GetAvailableAccountBalances() (*AvailableAccountBal
 
 	resp, err := client.do(postParameters)
 	if err != nil {
-		return nil, fmt.Errorf("do: %v", err)
+		return nil, fmt.Errorf("TradingClient.do: %v", err)
 	}
 
 	res := AvailableAccountBalances{}
 
 	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
+		return nil, fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	return &res, nil
@@ -67,13 +67,13 @@ func (client *TradingClient) GetAccountBalances(account string) (AccountBalances
 
 	resp, err := client.do(postParameters)
 	if err != nil {
-		return nil, fmt.Errorf("do: %v", err)
+		return nil, fmt.Errorf("TradingClient.do: %v", err)
 	}
 
 	res := AvailableAccountBalances{}
 
 	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
+		return nil, fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	if res.Exchange != nil {
@@ -88,7 +88,7 @@ func (client *TradingClient) GetAccountBalances(account string) (AccountBalances
 		return res.Lending, nil
 	}
 
-	return nil, errors.New("getaccountbalances: no account found")
+	return nil, errors.New("No account found")
 }
 
 func (a *AccountBalances) UnmarshalJSON(data []byte) error {
@@ -96,14 +96,14 @@ func (a *AccountBalances) UnmarshalJSON(data []byte) error {
 	res := make(map[string]string)
 
 	if err := json.Unmarshal(data, &res); err != nil {
-		return fmt.Errorf("json unmarshal: %v", err)
+		return fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	*a = make(AccountBalances)
 	for key, value := range res {
 
 		if res, err := strconv.ParseFloat(value, 64); err != nil {
-			return fmt.Errorf("parsefloat: %v", err)
+			return fmt.Errorf("strconv.ParseFloat: %v", err)
 		} else {
 			(*a)[key] = res
 		}

@@ -87,7 +87,8 @@ func (c *TradingClient) do(form url.Values) ([]byte, error) {
 
 	req, err := http.NewRequest("POST", TRADING_API_URL, strings.NewReader(form.Encode()))
 	if err != nil {
-		return nil, fmt.Errorf("new request: %v", err)
+		return nil, fmt.Errorf("http.NewRequest: %v (API command: %s)",
+			err, form.Get("command"))
 	}
 
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
@@ -95,7 +96,7 @@ func (c *TradingClient) do(form url.Values) ([]byte, error) {
 	req.Header.Add("Key", c.apiKey)
 
 	if sig, err := signForm(form, c.apiSecret); err != nil {
-		return nil, fmt.Errorf("sign form: %v", err)
+		return nil, fmt.Errorf("signForm: %v", err)
 	} else {
 		req.Header.Add("Sign", sig)
 	}
@@ -114,18 +115,19 @@ func (c *TradingClient) do(form url.Values) ([]byte, error) {
 	res := <-done
 
 	if res.err != nil {
-		return nil, fmt.Errorf("request: %v", res.err)
+		return nil, fmt.Errorf("http.Client.Do: %v", res.err)
 	}
 
 	defer res.resp.Body.Close()
 
 	body, err := ioutil.ReadAll(res.resp.Body)
 	if err != nil {
-		return body, fmt.Errorf("readall: %v", err)
+		return body, fmt.Errorf("ioutil.readAll: %v", err)
 	}
 
 	if res.resp.StatusCode != 200 {
-		return body, fmt.Errorf("status code: %s", res.resp.Status)
+		return body, fmt.Errorf("Status code: %s (API command: %s)",
+			res.resp.Status, form.Get("command"))
 	}
 
 	if err := checkAPIError(body); err != nil {
@@ -155,7 +157,7 @@ func signForm(form url.Values, apiSecret string) (string, error) {
 	mac := hmac.New(sha512.New, []byte(apiSecret))
 	_, err := mac.Write([]byte(form.Encode()))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("hash.Hash.Write: %v", err)
 	}
 	sig := hex.EncodeToString(mac.Sum(nil))
 

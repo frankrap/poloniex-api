@@ -2,7 +2,6 @@ package publicapi
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strconv"
 )
@@ -46,36 +45,16 @@ func (client *PublicClient) GetDayVolumes() (*DayVolumes, error) {
 
 	resp, err := client.do(params)
 	if err != nil {
-		return nil, fmt.Errorf("get: %v", err)
+		return nil, fmt.Errorf("PublicClient.do: %v", err)
 	}
 
 	res := DayVolumes{}
 
 	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
+		return nil, fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	return &res, nil
-}
-
-func convertToDayVolume(value map[string]interface{}) (DayVolume, error) {
-
-	dv := make(DayVolume)
-	for k, v := range value {
-
-		if v, ok := v.(string); ok {
-
-			if val, err := strconv.ParseFloat(v, 64); err != nil {
-				return nil, fmt.Errorf("parsefloat : %v", err)
-			} else {
-				dv[k] = val
-			}
-
-		} else {
-			return nil, fmt.Errorf("type error: %v", v)
-		}
-	}
-	return dv, nil
 }
 
 func (dv *DayVolumes) UnmarshalJSON(data []byte) error {
@@ -83,7 +62,7 @@ func (dv *DayVolumes) UnmarshalJSON(data []byte) error {
 	adv := make(map[string]interface{})
 
 	if err := json.Unmarshal(data, &adv); err != nil {
-		return fmt.Errorf("unmarshal adv: %v", err)
+		return fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	dv.DayVolumes = make(map[string]DayVolume)
@@ -95,22 +74,42 @@ func (dv *DayVolumes) UnmarshalJSON(data []byte) error {
 
 		case map[string]interface{}:
 			if res, err := convertToDayVolume(value); err != nil {
-				return fmt.Errorf("convert to dayvolume: %v", err)
+				return fmt.Errorf("convertToDayVolume: %v", err)
 			} else {
 				dv.DayVolumes[key] = res
 			}
 
 		case string:
 			if res, err := strconv.ParseFloat(value, 64); err != nil {
-				return fmt.Errorf("parsefloat: %v", err)
+				return fmt.Errorf("strconv.ParseFloat: %v", err)
 			} else {
 				dv.PrimaryCurrency[key] = res
 			}
 
 		default:
-			return errors.New("unmarshal adv error type")
+			return fmt.Errorf("Type error %v", value)
 		}
 	}
 
 	return nil
+}
+
+func convertToDayVolume(value map[string]interface{}) (DayVolume, error) {
+
+	dv := make(DayVolume)
+	for k, v := range value {
+
+		if v, ok := v.(string); ok {
+
+			if val, err := strconv.ParseFloat(v, 64); err != nil {
+				return nil, fmt.Errorf("strconv.ParseFloat : %v", err)
+			} else {
+				dv[k] = val
+			}
+
+		} else {
+			return nil, fmt.Errorf("Type error: %v", v)
+		}
+	}
+	return dv, nil
 }

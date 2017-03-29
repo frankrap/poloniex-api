@@ -55,7 +55,7 @@ func (client *PublicClient) GetChartData(currencyPair string, start, end time.Ti
 	case 14400: // 4h
 	case 86400: // 1d
 	default:
-		return nil, fmt.Errorf("wrong period: %d", period)
+		return nil, fmt.Errorf("Wrong period parameter: %d", period)
 	}
 
 	params := map[string]string{
@@ -68,13 +68,13 @@ func (client *PublicClient) GetChartData(currencyPair string, start, end time.Ti
 
 	resp, err := client.do(params)
 	if err != nil {
-		return nil, fmt.Errorf("get: %v", err)
+		return nil, fmt.Errorf("PublicClient.do: %v", err)
 	}
 
 	var res = make(ChartData, 200)
 
 	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
+		return nil, fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	return res, nil

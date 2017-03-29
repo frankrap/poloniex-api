@@ -46,7 +46,8 @@ func (c *PublicClient) do(params map[string]string) ([]byte, error) {
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("new request: %v", err)
+		return nil, fmt.Errorf("http.NewRequest: %v (API command: %s)",
+			err, params["command"])
 	}
 
 	req.Header.Add("Accept", "application/json")
@@ -65,18 +66,19 @@ func (c *PublicClient) do(params map[string]string) ([]byte, error) {
 	res := <-done
 
 	if res.err != nil {
-		return nil, fmt.Errorf("request: %v", res.err)
+		return nil, fmt.Errorf("http.Client.Do: %v", res.err)
 	}
 
 	defer res.resp.Body.Close()
 
 	body, err := ioutil.ReadAll(res.resp.Body)
 	if err != nil {
-		return body, fmt.Errorf("readall: %v", err)
+		return body, fmt.Errorf("ioutil.readAll: %v", err)
 	}
 
 	if res.resp.StatusCode != 200 {
-		return body, fmt.Errorf("status code: %s", res.resp.Status)
+		return body, fmt.Errorf("status code: %s (API command: %s)",
+			res.resp.Status, params["command"])
 	}
 
 	return body, nil

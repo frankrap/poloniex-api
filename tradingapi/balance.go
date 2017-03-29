@@ -27,13 +27,13 @@ func (client *TradingClient) GetBalances() (Balances, error) {
 
 	resp, err := client.do(postParameters)
 	if err != nil {
-		return nil, fmt.Errorf("do: %v", err)
+		return nil, fmt.Errorf("TradingClient.do: %v", err)
 	}
 
 	res := make(Balances)
 
 	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
+		return nil, fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	return res, nil
@@ -44,14 +44,14 @@ func (b *Balances) UnmarshalJSON(data []byte) error {
 	res := make(map[string]string)
 
 	if err := json.Unmarshal(data, &res); err != nil {
-		return fmt.Errorf("json unmarshal: %v", err)
+		return fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	*b = make(Balances)
 	for key, value := range res {
 
 		if res, err := strconv.ParseFloat(value, 64); err != nil {
-			return fmt.Errorf("parsefloat: %v", err)
+			return fmt.Errorf("strconv.ParseFloat: %v", err)
 		} else {
 			(*b)[key] = res
 		}

@@ -66,13 +66,13 @@ func (client *PublicClient) GetLoanOrders(currency string) (*LoanOrders, error) 
 
 	resp, err := client.do(params)
 	if err != nil {
-		return nil, fmt.Errorf("get: %v", err)
+		return nil, fmt.Errorf("PublicClient.do: %v", err)
 	}
 
 	res := LoanOrders{}
 
 	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
+		return nil, fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	return &res, nil

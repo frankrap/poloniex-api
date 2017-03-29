@@ -66,13 +66,13 @@ func (client *PublicClient) GetOrderBook(currencyPair string, depth int) (*Order
 
 	resp, err := client.do(params)
 	if err != nil {
-		return nil, fmt.Errorf("get: %v", err)
+		return nil, fmt.Errorf("PublicClient.do: %v", err)
 	}
 
 	res := OrderBook{}
 
 	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
+		return nil, fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	return &res, nil
@@ -120,13 +120,13 @@ func (client *PublicClient) GetOrderBooks(depth int) (OrderBooks, error) {
 
 	resp, err := client.do(params)
 	if err != nil {
-		return nil, fmt.Errorf("get: %v", err)
+		return nil, fmt.Errorf("PublicClient.do: %v", err)
 	}
 
 	res := make(OrderBooks)
 
 	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
+		return nil, fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	return res, nil
@@ -143,7 +143,7 @@ func (o *OrderBook) UnmarshalJSON(data []byte) error {
 	}
 
 	if err := json.Unmarshal(data, &aux); err != nil {
-		return fmt.Errorf("unmarshal aux: %v", err)
+		return fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	if aux.IsFrozen != "0" {
@@ -161,7 +161,7 @@ func (o *Order) UnmarshalJSON(data []byte) error {
 	tmp := []interface{}{&rateStr, &o.Quantity}
 
 	if err := json.Unmarshal(data, &tmp); err != nil {
-		return fmt.Errorf("unmarshal order: %v", err)
+		return fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	if got, want := len(tmp), 2; got != want {
@@ -170,7 +170,7 @@ func (o *Order) UnmarshalJSON(data []byte) error {
 	}
 
 	if val, err := strconv.ParseFloat(rateStr, 64); err != nil {
-		return fmt.Errorf("parsefloat: %v", err)
+		return fmt.Errorf("strconv.ParseFloat: %v", err)
 	} else {
 		o.Rate = val
 	}

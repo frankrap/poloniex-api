@@ -61,13 +61,13 @@ func (client *PublicClient) GetTradeHistory(currencyPair string, start, end time
 
 	resp, err := client.do(params)
 	if err != nil {
-		return nil, fmt.Errorf("get: %v", err)
+		return nil, fmt.Errorf("PublicClient.do: %v", err)
 	}
 
 	var res = make(TradeHistory, 200)
 
 	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
+		return nil, fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	return res, nil
@@ -108,13 +108,13 @@ func (client *PublicClient) GetPast200TradeHistory(currencyPair string) (TradeHi
 
 	resp, err := client.do(params)
 	if err != nil {
-		return nil, fmt.Errorf("get: %v", err)
+		return nil, fmt.Errorf("PublicClient.do: %v", err)
 	}
 
 	res := make(TradeHistory, 200)
 
 	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
+		return nil, fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	return res, nil
@@ -131,11 +131,11 @@ func (t *Trade) UnmarshalJSON(data []byte) error {
 	}
 
 	if err := json.Unmarshal(data, &aux); err != nil {
-		return fmt.Errorf("unmarshal aux: %v", err)
+		return fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	if timestamp, err := time.Parse("2006-01-02 15:04:05", aux.Date); err != nil {
-		return fmt.Errorf("timestamp conversion: %v", err)
+		return fmt.Errorf("time.Parse: %v", err)
 	} else {
 		t.Date = int64(timestamp.Unix())
 	}

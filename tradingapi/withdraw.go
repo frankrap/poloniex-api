@@ -34,14 +34,14 @@ func (client *TradingClient) Withdraw(currency string, amount float64, address s
 
 	resp, err := client.do(postParameters)
 	if err != nil {
-		return nil, fmt.Errorf("do: %v", err)
+		return nil, fmt.Errorf("TradingClient.do: %v", err)
 	}
 
 	fmt.Println(string(resp))
 	res := Withdrawal{}
 
 	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
+		return nil, fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	return &res, nil
@@ -59,13 +59,13 @@ func (client *TradingClient) WithdrawWithPaymentId(currency string, amount float
 
 	resp, err := client.do(postParameters)
 	if err != nil {
-		return nil, fmt.Errorf("do: %v", err)
+		return nil, fmt.Errorf("TradingClient.do %v", err)
 	}
 
 	res := Withdrawal{}
 
 	if err := json.Unmarshal(resp, &res); err != nil {
-		return nil, fmt.Errorf("json unmarshal: %v", err)
+		return nil, fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	return &res, nil

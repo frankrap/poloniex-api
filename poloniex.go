@@ -39,11 +39,11 @@ func (r *ResultingTrade) UnmarshalJSON(data []byte) error {
 	}
 
 	if err := json.Unmarshal(data, &aux); err != nil {
-		return fmt.Errorf("unmarshal aux: %v", err)
+		return fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	if timestamp, err := time.Parse("2006-01-02 15:04:05", aux.Date); err != nil {
-		return fmt.Errorf("timestamp conversion: %v", err)
+		return fmt.Errorf("time.Parse: %v", err)
 	} else {
 		r.Date = int64(timestamp.Unix())
 	}

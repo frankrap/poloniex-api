@@ -25,7 +25,7 @@ func (client *TradingClient) GenerateNewAddress(currency string) (string, error)
 
 	resp, err := client.do(postParameters)
 	if err != nil {
-		return "", fmt.Errorf("do: %v", err)
+		return "", fmt.Errorf("TradingClient.do: %v", err)
 	}
 
 	type Result struct {
@@ -36,11 +36,11 @@ func (client *TradingClient) GenerateNewAddress(currency string) (string, error)
 	res := Result{}
 
 	if err := json.Unmarshal(resp, &res); err != nil {
-		return "", fmt.Errorf("json unmarshal: %v", err)
+		return "", fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
 	if res.Success != 1 {
-		return "", fmt.Errorf("generate new address: %s", res.Response)
+		return "", fmt.Errorf("Error response: %s", res.Response)
 	}
 
 	return res.Response, nil
