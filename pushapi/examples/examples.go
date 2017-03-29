@@ -4,6 +4,7 @@ import (
 	"log"
 	"poloniex"
 	"poloniex/pushapi"
+	"time"
 )
 
 var client *pushapi.PushClient
@@ -31,10 +32,18 @@ func printPushTicker() {
 
 	go func() {
 		for {
-			msg := <-ticker
+			msg, ok := <-ticker
+			if !ok {
+				break
+			}
 			poloniex.PrettyPrintJson(msg)
 		}
 
+	}()
+
+	go func() {
+		time.Sleep(2 * time.Second)
+		client.UnsubscribeTicker()
 	}()
 
 	select {}
