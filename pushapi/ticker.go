@@ -2,7 +2,7 @@ package pushapi
 
 import (
 	"fmt"
-	"strconv"
+	"sync"
 )
 
 const (
@@ -25,6 +25,9 @@ type Tick struct {
 type Ticker chan *Tick
 
 var ticker Ticker
+
+var tickerMu sync.Mutex
+var tickerClosed bool
 
 // Poloniex push API implementation of ticker topic.
 //
@@ -49,7 +52,12 @@ func (client *PushClient) SubscribeTicker() (Ticker, error) {
 		if tick, err := convertArgsToTick(args); err != nil {
 			fmt.Printf("convertArgstoTick: %v\n", err)
 		} else {
-			ticker <- tick
+
+			tickerMu.Lock()
+			if !tickerClosed {
+				ticker <- tick
+			}
+			tickerMu.Unlock()
 		}
 	}
 
@@ -65,27 +73,16 @@ func (client *PushClient) UnsubscribeTicker() error {
 	if err := client.wampClient.Unsubscribe(TICKER); err != nil {
 		return fmt.Errorf("turnpike.Client.Unsuscribe: %v", err)
 	}
+	tickerMu.Lock()
+	tickerClosed = true
+	tickerMu.Unlock()
+
 	close(ticker)
 
 	return nil
 }
 
 func convertArgsToTick(args []interface{}) (*Tick, error) {
-
-	convertArg := func(arg interface{}) (float64, error) {
-
-		if v, ok := arg.(string); ok {
-
-			val, err := strconv.ParseFloat(v, 64)
-			if err != nil {
-				return 0, fmt.Errorf("strconv.ParseFloat: %v", err)
-			}
-			return val, nil
-
-		} else {
-			return 0, fmt.Errorf("type assertion failed: %v", arg)
-		}
-	}
 
 	var tick = Tick{}
 	var err error
@@ -96,18 +93,18 @@ func convertArgsToTick(args []interface{}) (*Tick, error) {
 		return nil, fmt.Errorf("'CurrencyPair' type assertion failed")
 	}
 
-	if tick.Last, err = convertArg(args[1]); err != nil {
-		return nil, fmt.Errorf("convertArg 'Last': %v", err)
-	} else if tick.LowestAsk, err = convertArg(args[2]); err != nil {
-		return nil, fmt.Errorf("convertArg 'LowestAsk': %v", err)
-	} else if tick.HighestBid, err = convertArg(args[3]); err != nil {
-		return nil, fmt.Errorf("convertArg 'HighestBid': %v", err)
-	} else if tick.PercentChange, err = convertArg(args[4]); err != nil {
-		return nil, fmt.Errorf("convertArg 'PercentChange': %v", err)
-	} else if tick.BaseVolume, err = convertArg(args[5]); err != nil {
-		return nil, fmt.Errorf("convertArg 'BaseVolume': %v", err)
-	} else if tick.QuoteVolume, err = convertArg(args[6]); err != nil {
-		return nil, fmt.Errorf("convertArg 'QuoteVolume': %v", err)
+	if tick.Last, err = convertStringToFloat(args[1]); err != nil {
+		return nil, fmt.Errorf("convertStringToFloat 'Last': %v", err)
+	} else if tick.LowestAsk, err = convertStringToFloat(args[2]); err != nil {
+		return nil, fmt.Errorf("convertStringToFloat 'LowestAsk': %v", err)
+	} else if tick.HighestBid, err = convertStringToFloat(args[3]); err != nil {
+		return nil, fmt.Errorf("convertStringToFloat 'HighestBid': %v", err)
+	} else if tick.PercentChange, err = convertStringToFloat(args[4]); err != nil {
+		return nil, fmt.Errorf("convertStringToFloat 'PercentChange': %v", err)
+	} else if tick.BaseVolume, err = convertStringToFloat(args[5]); err != nil {
+		return nil, fmt.Errorf("convertStringToFloat 'BaseVolume': %v", err)
+	} else if tick.QuoteVolume, err = convertStringToFloat(args[6]); err != nil {
+		return nil, fmt.Errorf("convertStringToFloat 'QuoteVolume': %v", err)
 	}
 
 	if v, ok := args[7].(float64); ok {
@@ -120,10 +117,10 @@ func convertArgsToTick(args []interface{}) (*Tick, error) {
 		return nil, fmt.Errorf("'IsFrozen' type assertion failed")
 	}
 
-	if tick.High24hr, err = convertArg(args[8]); err != nil {
-		return nil, fmt.Errorf("convertArg 'High24hr': %v", err)
-	} else if tick.Low24hr, err = convertArg(args[9]); err != nil {
-		return nil, fmt.Errorf("convertArg 'Low24hr': %v", err)
+	if tick.High24hr, err = convertStringToFloat(args[8]); err != nil {
+		return nil, fmt.Errorf("convertStringToFloat 'High24hr': %v", err)
+	} else if tick.Low24hr, err = convertStringToFloat(args[9]); err != nil {
+		return nil, fmt.Errorf("convertStringToFloat 'Low24hr': %v", err)
 	}
 
 	return &tick, nil

@@ -10,6 +10,7 @@ package pushapi
 
 import (
 	"fmt"
+	"strconv"
 
 	turnpike "gopkg.in/jcelliott/turnpike.v2"
 )
@@ -53,4 +54,19 @@ func (client *PushClient) Close() error {
 		return fmt.Errorf("turnpike.Client.LeaveRealm: %v", err)
 	}
 	return nil
+}
+
+func convertStringToFloat(arg interface{}) (float64, error) {
+
+	if v, ok := arg.(string); ok {
+
+		val, err := strconv.ParseFloat(v, 64)
+		if err != nil {
+			return 0, fmt.Errorf("strconv.ParseFloat: %v", err)
+		}
+		return val, nil
+
+	} else {
+		return 0, fmt.Errorf("type assertion failed: %v", arg)
+	}
 }
