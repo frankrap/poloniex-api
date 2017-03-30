@@ -1,6 +1,7 @@
 package pushapi
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 )
@@ -124,7 +125,7 @@ func convertArgsToTick(args []interface{}) (*Tick, error) {
 			tick.IsFrozen = true
 		}
 	} else {
-		return nil, fmt.Errorf("'IsFrozen' type assertion failed")
+		return nil, errors.New("'IsFrozen' type assertion failed")
 	}
 
 	if tick.High24hr, err = convertStringToFloat(args[8]); err != nil {

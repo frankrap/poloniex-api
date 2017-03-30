@@ -19,8 +19,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	go printTicker()
+	// go printTicker()
 	// go printTrollbox()
+	go printMarketUpdates()
 	select {}
 }
 
@@ -77,4 +78,20 @@ func printTrollbox() {
 		time.Sleep(5 * time.Second)
 		client.UnsubscribeTrollbox()
 	}()
+}
+
+func printMarketUpdates() {
+	marketUpdate, err := client.SubscribeMarket("BTC_ETH")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	for {
+		msg, ok := <-marketUpdate
+		if !ok {
+			break
+		}
+		poloniex.PrettyPrintJson(msg)
+	}
+
 }

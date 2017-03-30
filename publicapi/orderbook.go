@@ -13,7 +13,7 @@ type OrderBook struct {
 	Asks     []Order `json:"asks"`
 	Bids     []Order `json:"bids"`
 	IsFrozen bool
-	Seq      uint64
+	Seq      int64
 }
 
 type Order struct {
