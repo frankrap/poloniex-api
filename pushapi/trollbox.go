@@ -19,10 +19,12 @@ type TrollboxMessage struct {
 
 type Trollbox chan *TrollboxMessage
 
-var trollbox Trollbox
+var (
+	trollbox Trollbox
 
-var trollboxMu sync.Mutex
-var trollboxClosed bool
+	trollboxMu     sync.Mutex
+	trollboxIsOpen bool
+)
 
 // Poloniex push API implementation of trollbox topic.
 //
@@ -38,7 +40,15 @@ var trollboxClosed bool
 // ['trollboxMessage',2094211,'boxOfTroll','Trololol',4]
 func (client *PushClient) SubscribeTrollbox() (Trollbox, error) {
 
+	trollboxMu.Lock()
+	defer trollboxMu.Unlock()
+
+	if trollboxIsOpen {
+		return trollbox, nil
+	}
+
 	trollbox = make(Trollbox)
+	trollboxIsOpen = true
 
 	handler := func(args []interface{}, kwargs map[string]interface{}) {
 
@@ -47,7 +57,7 @@ func (client *PushClient) SubscribeTrollbox() (Trollbox, error) {
 		} else {
 
 			trollboxMu.Lock()
-			if !trollboxClosed {
+			if trollboxIsOpen {
 				trollbox <- tbMsg
 			}
 			trollboxMu.Unlock()
@@ -67,9 +77,9 @@ func (client *PushClient) UnsubscribeTrollbox() error {
 		return fmt.Errorf("turnpike.Client.Unsuscribe: %v", err)
 	}
 	trollboxMu.Lock()
-	trollboxClosed = true
-	trollboxMu.Unlock()
+	defer trollboxMu.Unlock()
 
+	trollboxIsOpen = false
 	close(trollbox)
 
 	return nil

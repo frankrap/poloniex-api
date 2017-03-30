@@ -20,20 +20,19 @@ func main() {
 	}
 
 	go printTicker()
-	go printTrollbox()
+	// go printTrollbox()
 	select {}
 }
 
 // Print ticker periodically
 func printTicker() {
 
-	ticker, err := client.SubscribeTicker()
+	loop := func() {
+		ticker, err := client.SubscribeTicker()
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	go func() {
+		if err != nil {
+			log.Fatal(err)
+		}
 		for {
 			msg, ok := <-ticker
 			if !ok {
@@ -42,11 +41,15 @@ func printTicker() {
 			poloniex.PrettyPrintJson(msg)
 		}
 
-	}()
+	}
+	go loop()
 
 	go func() {
 		time.Sleep(1 * time.Second)
-		client.UnsubscribeTicker()
+		//client.UnsubscribeTicker()
+
+		time.Sleep(2 * time.Second)
+		go loop()
 	}()
 }
 

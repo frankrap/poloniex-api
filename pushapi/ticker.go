@@ -24,10 +24,12 @@ type Tick struct {
 
 type Ticker chan *Tick
 
-var ticker Ticker
+var (
+	ticker Ticker
 
-var tickerMu sync.Mutex
-var tickerClosed bool
+	tickerMu     sync.Mutex
+	tickerIsOpen bool
+)
 
 // Poloniex push API implementation of ticker topic.
 //
@@ -45,7 +47,15 @@ var tickerClosed bool
 //  '8.63286802','11983.47150109',0,'0.00107920','0.00045422']
 func (client *PushClient) SubscribeTicker() (Ticker, error) {
 
+	tickerMu.Lock()
+	defer tickerMu.Unlock()
+
+	if tickerIsOpen {
+		return ticker, nil
+	}
+
 	ticker = make(Ticker)
+	tickerIsOpen = true
 
 	handler := func(args []interface{}, kwargs map[string]interface{}) {
 
@@ -54,7 +64,7 @@ func (client *PushClient) SubscribeTicker() (Ticker, error) {
 		} else {
 
 			tickerMu.Lock()
-			if !tickerClosed {
+			if tickerIsOpen {
 				ticker <- tick
 			}
 			tickerMu.Unlock()
@@ -74,9 +84,9 @@ func (client *PushClient) UnsubscribeTicker() error {
 		return fmt.Errorf("turnpike.Client.Unsuscribe: %v", err)
 	}
 	tickerMu.Lock()
-	tickerClosed = true
-	tickerMu.Unlock()
+	defer tickerMu.Unlock()
 
+	tickerIsOpen = false
 	close(ticker)
 
 	return nil
