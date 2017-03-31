@@ -121,10 +121,15 @@ func (client *PushClient) SubscribeMarket(currencyPair string) (MarketUpdater, e
 
 	handler := func(args []interface{}, kwargs map[string]interface{}) {
 
-		//detect heartbeat not implemented
 		seq, ok := kwargs["seq"].(float64)
 		if !ok {
 			fmt.Printf("'seq' type assertion failed")
+			return
+		}
+
+		if len(args) == 0 {
+			// Heartbeat
+			// int64(seq)
 			return
 		}
 
