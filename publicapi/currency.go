@@ -95,3 +95,15 @@ func (c *Currency) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
+
+func (collection Currencies) Filter(f func(Currency) bool) Currencies {
+
+	res := make(Currencies)
+
+	for k, currency := range collection {
+		if f(currency) {
+			res[k] = currency
+		}
+	}
+	return res
+}

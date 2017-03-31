@@ -93,5 +93,4 @@ func printMarketUpdates() {
 		}
 		poloniex.PrettyPrintJson(msg)
 	}
-
 }
