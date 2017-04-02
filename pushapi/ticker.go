@@ -26,10 +26,10 @@ type Tick struct {
 type Ticker chan *Tick
 
 var (
-	ticker Ticker
+	ticker = make(Ticker)
 
-	tickerMu     sync.Mutex
-	tickerIsOpen bool
+	tickerMu           sync.RWMutex
+	tickerUnsubscribed = make(chan struct{})
 )
 
 // Poloniex push API implementation of ticker topic.
@@ -48,33 +48,33 @@ var (
 //  '8.63286802','11983.47150109',0,'0.00107920','0.00045422']
 func (client *PushClient) SubscribeTicker() (Ticker, error) {
 
-	tickerMu.Lock()
-	defer tickerMu.Unlock()
-
-	if tickerIsOpen {
-		return ticker, nil
-	}
-
-	ticker = make(Ticker)
-	tickerIsOpen = true
-
 	handler := func(args []interface{}, kwargs map[string]interface{}) {
 
-		if tick, err := convertArgsToTick(args); err != nil {
+		tick, err := convertArgsToTick(args)
+		if err != nil {
 			fmt.Printf("convertArgstoTick: %v\n", err)
-		} else {
-
-			tickerMu.Lock()
-			if tickerIsOpen {
-				ticker <- tick
-			}
-			tickerMu.Unlock()
+			return
 		}
+
+		tickerMu.RLock()
+		select {
+		case ticker <- tick:
+		case <-tickerUnsubscribed:
+		}
+		tickerMu.RUnlock()
 	}
 
 	if err := client.wampClient.Subscribe(TICKER, nil, handler); err != nil {
 		return nil, fmt.Errorf("turnpike.Client.Subscribe: %v", err)
 	}
+
+	tickerMu.Lock()
+	select {
+	case <-tickerUnsubscribed:
+		tickerUnsubscribed = make(chan struct{})
+	default:
+	}
+	tickerMu.Unlock()
 
 	return ticker, nil
 }
@@ -84,11 +84,10 @@ func (client *PushClient) UnsubscribeTicker() error {
 	if err := client.wampClient.Unsubscribe(TICKER); err != nil {
 		return fmt.Errorf("turnpike.Client.Unsuscribe: %v", err)
 	}
-	tickerMu.Lock()
-	defer tickerMu.Unlock()
 
-	tickerIsOpen = false
-	close(ticker)
+	tickerMu.RLock()
+	close(tickerUnsubscribed)
+	defer tickerMu.RUnlock()
 
 	return nil
 }

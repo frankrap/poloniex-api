@@ -28,34 +28,42 @@ func main() {
 // Print ticker periodically
 func printTicker() {
 
-	loop := func() {
-		ticker, err := client.SubscribeTicker()
-
-		if err != nil {
-			log.Fatal(err)
-		}
-		for {
-			msg, ok := <-ticker
-			if !ok {
-				break
-			}
-			poloniex.PrettyPrintJson(msg)
-		}
-
+	done := make(chan struct{})
+	ticker, err := client.SubscribeTicker()
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	loop := func() {
+
+		for {
+			select {
+			case msg := <-ticker:
+				poloniex.PrettyPrintJson(msg)
+			case <-done:
+				//return
+			}
+		}
+	}
+
 	go loop()
 
-	go func() {
-		time.Sleep(1 * time.Second)
-		//client.UnsubscribeTicker()
+	time.Sleep(3 * time.Second)
+	client.UnsubscribeTicker()
+	done <- struct{}{}
 
-		time.Sleep(2 * time.Second)
-		go loop()
-	}()
+	time.Sleep(3 * time.Second)
+	client.SubscribeTicker()
+
+	time.Sleep(3 * time.Second)
+	client.UnsubscribeTicker()
+	done <- struct{}{}
 }
 
 // Print trollbox periodically
 func printTrollbox() {
+
+	done := make(chan struct{})
 
 	trollbox, err := client.SubscribeTrollbox()
 
@@ -65,32 +73,45 @@ func printTrollbox() {
 
 	go func() {
 		for {
-			msg, ok := <-trollbox
-			if !ok {
-				break
+			select {
+			case msg := <-trollbox:
+				fmt.Printf("%d | %s: %s\n", msg.Reputation, msg.Username, msg.Message)
+			case <-done:
+				return
 			}
-			fmt.Printf("%d | %s: %s\n", msg.Reputation, msg.Username, msg.Message)
 		}
 
 	}()
 
-	go func() {
-		time.Sleep(5 * time.Second)
-		client.UnsubscribeTrollbox()
-	}()
+	time.Sleep(15 * time.Second)
+	client.UnsubscribeTrollbox()
+	done <- struct{}{}
 }
 
 func printMarketUpdates() {
+
+	done := make(chan struct{})
 	marketUpdate, err := client.SubscribeMarket("BTC_ETH")
 
 	if err != nil {
 		log.Fatal(err)
 	}
-	for {
-		msg, ok := <-marketUpdate
-		if !ok {
-			break
+
+	go func() {
+		for {
+			select {
+			case msg := <-marketUpdate:
+				poloniex.PrettyPrintJson(msg)
+			case <-done:
+				return
+			}
 		}
-		poloniex.PrettyPrintJson(msg)
-	}
+	}()
+	time.Sleep(3 * time.Second)
+	client.UnsubscribeMarket("BTC_ETH")
+	client.SubscribeMarket("BTC_ETH")
+
+	time.Sleep(2 * time.Second)
+	client.UnsubscribeMarket("BTC_ETH")
+	done <- struct{}{}
 }

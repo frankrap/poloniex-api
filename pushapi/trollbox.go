@@ -20,10 +20,10 @@ type TrollboxMessage struct {
 type Trollbox chan *TrollboxMessage
 
 var (
-	trollbox Trollbox
+	trollbox = make(Trollbox)
 
-	trollboxMu     sync.Mutex
-	trollboxIsOpen bool
+	trollboxMu           sync.RWMutex
+	trollboxUnsubscribed = make(chan struct{})
 )
 
 // Poloniex push API implementation of trollbox topic.
@@ -40,33 +40,33 @@ var (
 // ['trollboxMessage',2094211,'boxOfTroll','Trololol',4]
 func (client *PushClient) SubscribeTrollbox() (Trollbox, error) {
 
-	trollboxMu.Lock()
-	defer trollboxMu.Unlock()
-
-	if trollboxIsOpen {
-		return trollbox, nil
-	}
-
-	trollbox = make(Trollbox)
-	trollboxIsOpen = true
-
 	handler := func(args []interface{}, kwargs map[string]interface{}) {
 
-		if tbMsg, err := convertArgsToTrollboxMessage(args); err != nil {
+		tbMsg, err := convertArgsToTrollboxMessage(args)
+		if err != nil {
 			fmt.Printf("convertArgsToTrollboxMessage: %v\n", err)
-		} else {
-
-			trollboxMu.Lock()
-			if trollboxIsOpen {
-				trollbox <- tbMsg
-			}
-			trollboxMu.Unlock()
+			return
 		}
+
+		trollboxMu.RLock()
+		select {
+		case trollbox <- tbMsg:
+		case <-trollboxUnsubscribed:
+		}
+		trollboxMu.RUnlock()
 	}
 
 	if err := client.wampClient.Subscribe(TROLLBOX, nil, handler); err != nil {
 		return nil, fmt.Errorf("turnpike.Client.Subscribe: %v", err)
 	}
+
+	trollboxMu.Lock()
+	select {
+	case <-trollboxUnsubscribed:
+		trollboxUnsubscribed = make(chan struct{})
+	default:
+	}
+	trollboxMu.Unlock()
 
 	return trollbox, nil
 }
@@ -76,11 +76,10 @@ func (client *PushClient) UnsubscribeTrollbox() error {
 	if err := client.wampClient.Unsubscribe(TROLLBOX); err != nil {
 		return fmt.Errorf("turnpike.Client.Unsuscribe: %v", err)
 	}
-	trollboxMu.Lock()
-	defer trollboxMu.Unlock()
 
-	trollboxIsOpen = false
-	close(trollbox)
+	trollboxMu.RLock()
+	close(trollboxUnsubscribed)
+	trollboxMu.RUnlock()
 
 	return nil
 }

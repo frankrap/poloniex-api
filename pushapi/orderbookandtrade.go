@@ -37,13 +37,19 @@ type NewTrade struct {
 	TypeOrder string  `json:"type"`
 }
 
+// Not concurrency safe
 type MarketUpdater chan *MarketUpdates
 
-var (
-	marketUpdates = make(map[string]MarketUpdater)
+type marketUpdaterInfo struct {
+	updater MarketUpdater
 
-	marketUpdatesMu     = make(map[string]sync.Mutex)
-	marketUpdatesIsOpen = make(map[string]bool)
+	mu           sync.RWMutex
+	unsubscribed chan struct{}
+}
+
+var (
+	mutex              sync.RWMutex
+	marketUpdaterInfos = make(map[string]*marketUpdaterInfo)
 )
 
 // Poloniex push API implementation of order book and trade topics.
@@ -108,17 +114,6 @@ var (
 // Be sure to loop through the entire array, otherwise you will miss some updates.
 func (client *PushClient) SubscribeMarket(currencyPair string) (MarketUpdater, error) {
 
-	mutex := marketUpdatesMu[currencyPair]
-	mutex.Lock()
-	defer mutex.Unlock()
-
-	if marketUpdatesIsOpen[currencyPair] {
-		return marketUpdates[currencyPair], nil
-	}
-
-	marketUpdates[currencyPair] = make(MarketUpdater)
-	marketUpdatesIsOpen[currencyPair] = true
-
 	handler := func(args []interface{}, kwargs map[string]interface{}) {
 
 		seq, ok := kwargs["seq"].(float64)
@@ -133,24 +128,49 @@ func (client *PushClient) SubscribeMarket(currencyPair string) (MarketUpdater, e
 			return
 		}
 
-		if updates, err := convertArgsToMarketUpdateSlice(args); err != nil {
-			fmt.Printf("convertArgstoMarketUpdate: %v\n", err)
+		updates, err := convertArgsToMarketUpdateSlice(args)
+		if err != nil {
+			fmt.Printf("convertArgsToMarketUpdateSlice: %v\n", err)
 			return
-		} else {
-
-			mutex.Lock()
-			if marketUpdatesIsOpen[currencyPair] {
-				marketUpdates[currencyPair] <- &MarketUpdates{int64(seq), updates}
-			}
-			mutex.Unlock()
 		}
+
+		mutex.RLock()
+		updaterInfo := marketUpdaterInfos[currencyPair]
+		mutex.RUnlock()
+
+		updaterInfo.mu.RLock()
+		select {
+		case updaterInfo.updater <- &MarketUpdates{int64(seq), updates}:
+		case <-updaterInfo.unsubscribed:
+		}
+		updaterInfo.mu.RUnlock()
 	}
 
 	if err := client.wampClient.Subscribe(currencyPair, nil, handler); err != nil {
 		return nil, fmt.Errorf("turnpike.Client.Subscribe: %v", err)
 	}
 
-	return marketUpdates[currencyPair], nil
+	mutex.Lock()
+	updaterInfo, ok := marketUpdaterInfos[currencyPair]
+	if !ok {
+		updaterInfo = &marketUpdaterInfo{
+			updater:      make(MarketUpdater),
+			unsubscribed: make(chan struct{}),
+			mu:           sync.RWMutex{},
+		}
+		marketUpdaterInfos[currencyPair] = updaterInfo
+	}
+	mutex.Unlock()
+
+	updaterInfo.mu.Lock()
+	select {
+	case <-updaterInfo.unsubscribed:
+		updaterInfo.unsubscribed = make(chan struct{})
+	default:
+	}
+	updaterInfo.mu.Unlock()
+
+	return updaterInfo.updater, nil
 }
 
 func (client *PushClient) UnsubscribeMarket(currencyPair string) error {
@@ -159,12 +179,13 @@ func (client *PushClient) UnsubscribeMarket(currencyPair string) error {
 		return fmt.Errorf("turnpike.Client.Unsuscribe: %v", err)
 	}
 
-	mutex := marketUpdatesMu[currencyPair]
-	mutex.Lock()
-	defer mutex.Unlock()
+	mutex.RLock()
+	updaterInfo := marketUpdaterInfos[currencyPair]
+	mutex.RUnlock()
 
-	marketUpdatesIsOpen[currencyPair] = false
-	close(marketUpdates[currencyPair])
+	updaterInfo.mu.RLock()
+	close(updaterInfo.unsubscribed)
+	updaterInfo.mu.RUnlock()
 
 	return nil
 }
