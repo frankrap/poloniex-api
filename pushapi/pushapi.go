@@ -9,30 +9,52 @@
 package pushapi
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"strconv"
 
 	turnpike "gopkg.in/jcelliott/turnpike.v2"
 )
 
-const (
-	WSSURI = "wss://api.poloniex.com"
-	REALM  = "realm1"
-)
+var conf *configuration
 
 type PushClient struct {
 	wampClient *turnpike.Client
 }
 
+type configuration struct {
+	PushAPI struct {
+		WssUri string `json:"wss_uri"`
+		Realm  string `json:"realm"`
+	} `json:"push_api"`
+}
+
+func init() {
+
+	content, err := ioutil.ReadFile("conf.json")
+
+	if err != nil {
+		log.Fatalf("loading configuration: %v", err)
+	}
+
+	if err := json.Unmarshal(content, &conf); err != nil {
+		log.Fatalf("loading configuration: %v", err)
+	}
+}
+
 func NewPushClient() (*PushClient, error) {
 
 	turnpike.Debug()
-	client, err := turnpike.NewWebsocketClient(turnpike.JSON, WSSURI, nil, nil)
+	client, err := turnpike.NewWebsocketClient(turnpike.JSON,
+		conf.PushAPI.WssUri, nil, nil)
+
 	if err != nil {
 		return nil, fmt.Errorf("turnpike.NewWebsocketClient: %v", err)
 	}
 
-	_, err = client.JoinRealm(REALM, nil)
+	_, err = client.JoinRealm(conf.PushAPI.Realm, nil)
 	if err != nil {
 		return nil, fmt.Errorf("turnpike.Client.JoinRealm: %v", err)
 	}

@@ -1,0 +1,6 @@
+{
+    "push_api": {
+        "wss_uri": "wss://api.poloniex.com",
+        "realm": "realm1"
+    }
+}
