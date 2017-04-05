@@ -9,31 +9,53 @@
 package publicapi
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 )
 
-const (
-	PUBLIC_API_URL             = "https://poloniex.com/public"
-	DEFAULT_HTTPCLIENT_TIMEOUT = 10
-	MAX_REQUEST_PER_SECOND     = 5
-)
+var conf *configuration
 
 type PublicClient struct {
 	httpClient *http.Client
 	throttle   <-chan time.Time
 }
 
+type configuration struct {
+	PublicAPI struct {
+		PublicAPIUrl         string `json:"public_api_url"`
+		HTTPClientTimeoutSec int    `json:"httpclient_timeout_sec"`
+		MaxRequestsSec       int    `json:"max_requests_sec"`
+	} `json:"public_api"`
+}
+
+func init() {
+
+	content, err := ioutil.ReadFile("conf.json")
+
+	if err != nil {
+		log.Fatalf("loading configuration: %v", err)
+	}
+
+	if err := json.Unmarshal(content, &conf); err != nil {
+		log.Fatalf("loading configuration: %v", err)
+	}
+}
+
 // NewPublicClient returns a newly configured client
 func NewPublicClient() *PublicClient {
 
-	reqInterval := 1000 / MAX_REQUEST_PER_SECOND * time.Millisecond
+	reqInterval := 1000 * time.Millisecond /
+		time.Duration(conf.PublicAPI.MaxRequestsSec)
+
 	client := http.Client{
-		Timeout: DEFAULT_HTTPCLIENT_TIMEOUT * time.Second,
+		Timeout: time.Duration(conf.PublicAPI.HTTPClientTimeoutSec) *
+			time.Second,
 	}
 
 	return &PublicClient{&client, time.Tick(reqInterval)}
@@ -86,7 +108,7 @@ func (c *PublicClient) do(params map[string]string) ([]byte, error) {
 
 func buildUrl(params map[string]string) string {
 
-	u := PUBLIC_API_URL + "?"
+	u := conf.PublicAPI.PublicAPIUrl + "?"
 
 	var parameters []string
 	for k, v := range params {
