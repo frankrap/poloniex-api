@@ -76,7 +76,7 @@ func (t *Tick) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return fmt.Errorf("json.Unmarshal: %v", err)
 	}
-	fmt.Println(aux.IsFrozen)
+
 	if aux.IsFrozen != "0" {
 		t.IsFrozen = true
 	} else {
