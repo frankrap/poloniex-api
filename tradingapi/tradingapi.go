@@ -33,12 +33,15 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
 )
+
+var conf *configuration
 
 const (
 	TRADING_API_URL            = "https://poloniex.com/tradingApi"
@@ -57,21 +60,51 @@ type APIError struct {
 	Err string `json:"error"`
 }
 
-// NewTradingClient returns a newly configured client
-func NewTradingClient(apiKey, apiSecret string) (*TradingClient, error) {
+type configuration struct {
+	TradingAPI struct {
+		TradingAPIUrl        string `json:"trading_api_url"`
+		HTTPClientTimeoutSec int    `json:"httpclient_timeout_sec"`
+		MaxRequestsSec       int    `json:"max_requests_sec"`
+		ApiKey               string `json:"api_key"`
+		ApiSecret            string `json:"api_secret"`
+	} `json:"trading_api"`
+}
 
-	reqInterval := 1000 / MAX_REQUEST_PER_SECOND * time.Millisecond
-	client := http.Client{
-		Timeout: DEFAULT_HTTPCLIENT_TIMEOUT * time.Second,
+// Loading configuration
+func init() {
+
+	content, err := ioutil.ReadFile("conf.json")
+
+	if err != nil {
+		log.Fatalf("loading configuration: %v", err)
 	}
 
-	if len(apiKey) == 0 || len(apiSecret) == 0 {
-		return nil, errors.New("new trading client: wrong apikey and/or apisecret")
+	if err := json.Unmarshal(content, &conf); err != nil {
+		log.Fatalf("loading configuration: %v", err)
+	}
+}
+
+// NewTradingClient returns a newly configured client
+func NewTradingClient() (*TradingClient, error) {
+
+	reqInterval := 1000 * time.Millisecond /
+		time.Duration(conf.TradingAPI.MaxRequestsSec)
+
+	client := http.Client{
+		Timeout: time.Duration(conf.TradingAPI.HTTPClientTimeoutSec) *
+			time.Second,
+	}
+
+	if len(conf.TradingAPI.ApiKey) == 0 ||
+		len(conf.TradingAPI.ApiSecret) == 0 {
+
+		err := errors.New("new trading client: wrong apikey and/or apisecret")
+		return nil, err
 	}
 
 	tc := TradingClient{
-		apiKey,
-		apiSecret,
+		conf.TradingAPI.ApiKey,
+		conf.TradingAPI.ApiSecret,
 		&client,
 		time.Tick(reqInterval),
 	}
@@ -85,7 +118,10 @@ func (c *TradingClient) do(form url.Values) ([]byte, error) {
 	nonce := time.Now().UnixNano()
 	form.Add("nonce", strconv.Itoa(int(nonce)))
 
-	req, err := http.NewRequest("POST", TRADING_API_URL, strings.NewReader(form.Encode()))
+	req, err := http.NewRequest("POST",
+		conf.TradingAPI.TradingAPIUrl,
+		strings.NewReader(form.Encode()))
+
 	if err != nil {
 		return nil, fmt.Errorf("http.NewRequest: %v (API command: %s)",
 			err, form.Get("command"))

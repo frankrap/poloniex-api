@@ -13,7 +13,7 @@ var client *tradingapi.TradingClient
 func main() {
 
 	var err error
-	client, err = tradingapi.NewTradingClient(poloniex.API_KEY, poloniex.API_SECRET)
+	client, err = tradingapi.NewTradingClient()
 
 	if err != nil {
 		log.Fatal(err)
