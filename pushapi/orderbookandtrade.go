@@ -3,9 +3,10 @@ package pushapi
 import (
 	"encoding/json"
 	"fmt"
-	log "logrus"
 	"sync"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type MarketUpdates struct {

@@ -2,8 +2,9 @@ package pushapi
 
 import (
 	"fmt"
-	log "logrus"
 	"sync"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const (

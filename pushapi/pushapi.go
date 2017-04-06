@@ -12,9 +12,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	log "logrus"
 	"strconv"
 
+	log "github.com/sirupsen/logrus"
 	turnpike "gopkg.in/jcelliott/turnpike.v2"
 )
 

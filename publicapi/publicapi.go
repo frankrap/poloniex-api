@@ -12,11 +12,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	log "logrus"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var conf *configuration

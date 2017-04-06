@@ -33,14 +33,13 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	log "logrus"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
 
-	turnpike "gopkg.in/jcelliott/turnpike.v2"
+	log "github.com/sirupsen/logrus"
 )
 
 var conf *configuration
@@ -88,7 +87,6 @@ func init() {
 
 	switch conf.TradingAPI.LogLevel {
 	case "debug":
-		turnpike.Debug()
 		log.SetLevel(log.DebugLevel)
 	case "info":
 		log.SetLevel(log.InfoLevel)
