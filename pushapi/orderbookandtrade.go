@@ -3,6 +3,7 @@ package pushapi
 import (
 	"encoding/json"
 	"fmt"
+	log "logrus"
 	"sync"
 	"time"
 )
@@ -130,7 +131,7 @@ func (client *PushClient) SubscribeMarket(currencyPair string) (MarketUpdater, e
 
 		updates, err := convertArgsToMarketUpdateSlice(args)
 		if err != nil {
-			fmt.Printf("convertArgsToMarketUpdateSlice: %v\n", err)
+			log.WithField("error", err).Error("convertArgsToMarketUpdateSlice")
 			return
 		}
 

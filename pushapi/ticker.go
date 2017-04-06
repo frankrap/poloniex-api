@@ -3,6 +3,7 @@ package pushapi
 import (
 	"errors"
 	"fmt"
+	log "logrus"
 	"sync"
 )
 
@@ -52,7 +53,7 @@ func (client *PushClient) SubscribeTicker() (Ticker, error) {
 
 		tick, err := convertArgsToTick(args)
 		if err != nil {
-			fmt.Printf("convertArgstoTick: %v\n", err)
+			log.WithField("error", err).Error("convertArgstoTick")
 			return
 		}
 

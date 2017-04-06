@@ -33,12 +33,14 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
+	log "logrus"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
+
+	turnpike "gopkg.in/jcelliott/turnpike.v2"
 )
 
 var conf *configuration
@@ -67,6 +69,7 @@ type configuration struct {
 		MaxRequestsSec       int    `json:"max_requests_sec"`
 		ApiKey               string `json:"api_key"`
 		ApiSecret            string `json:"api_secret"`
+		LogLevel             string `json:"log_level"`
 	} `json:"trading_api"`
 }
 
@@ -76,11 +79,29 @@ func init() {
 	content, err := ioutil.ReadFile("conf.json")
 
 	if err != nil {
-		log.Fatalf("loading configuration: %v", err)
+		log.WithField("error", err).Fatal("loading configuration")
 	}
 
 	if err := json.Unmarshal(content, &conf); err != nil {
-		log.Fatalf("loading configuration: %v", err)
+		log.WithField("error", err).Fatal("loading configuration")
+	}
+
+	switch conf.TradingAPI.LogLevel {
+	case "debug":
+		turnpike.Debug()
+		log.SetLevel(log.DebugLevel)
+	case "info":
+		log.SetLevel(log.InfoLevel)
+	case "warn":
+		log.SetLevel(log.WarnLevel)
+	case "error":
+		log.SetLevel(log.ErrorLevel)
+	case "fatal":
+		log.SetLevel(log.FatalLevel)
+	case "panic":
+		log.SetLevel(log.PanicLevel)
+	default:
+		log.SetLevel(log.WarnLevel)
 	}
 }
 

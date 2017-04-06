@@ -12,7 +12,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
+	log "logrus"
 	"strconv"
 
 	turnpike "gopkg.in/jcelliott/turnpike.v2"
@@ -26,8 +26,9 @@ type PushClient struct {
 
 type configuration struct {
 	PushAPI struct {
-		WssUri string `json:"wss_uri"`
-		Realm  string `json:"realm"`
+		WssUri   string `json:"wss_uri"`
+		Realm    string `json:"realm"`
+		LogLevel string `json:"log_level"`
 	} `json:"push_api"`
 }
 
@@ -36,17 +37,34 @@ func init() {
 	content, err := ioutil.ReadFile("conf.json")
 
 	if err != nil {
-		log.Fatalf("loading configuration: %v", err)
+		log.WithField("error", err).Fatal("loading configuration")
 	}
 
 	if err := json.Unmarshal(content, &conf); err != nil {
-		log.Fatalf("loading configuration: %v", err)
+		log.WithField("error", err).Fatal("loading configuration")
+	}
+
+	switch conf.PushAPI.LogLevel {
+	case "debug":
+		turnpike.Debug()
+		log.SetLevel(log.DebugLevel)
+	case "info":
+		log.SetLevel(log.InfoLevel)
+	case "warn":
+		log.SetLevel(log.WarnLevel)
+	case "error":
+		log.SetLevel(log.ErrorLevel)
+	case "fatal":
+		log.SetLevel(log.FatalLevel)
+	case "panic":
+		log.SetLevel(log.PanicLevel)
+	default:
+		log.SetLevel(log.WarnLevel)
 	}
 }
 
 func NewPushClient() (*PushClient, error) {
 
-	turnpike.Debug()
 	client, err := turnpike.NewWebsocketClient(turnpike.JSON,
 		conf.PushAPI.WssUri, nil, nil)
 

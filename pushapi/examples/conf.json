@@ -1,6 +1,7 @@
 {
     "push_api": {
         "wss_uri": "wss://api.poloniex.com",
-        "realm": "realm1"
+        "realm": "realm1",
+        "log_level": "debug"
     }
 }

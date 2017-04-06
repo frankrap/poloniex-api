@@ -12,7 +12,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
+	log "logrus"
 	"net/http"
 	"net/url"
 	"strings"
@@ -31,6 +31,7 @@ type configuration struct {
 		PublicAPIUrl         string `json:"public_api_url"`
 		HTTPClientTimeoutSec int    `json:"httpclient_timeout_sec"`
 		MaxRequestsSec       int    `json:"max_requests_sec"`
+		LogLevel             string `json:"log_level"`
 	} `json:"public_api"`
 }
 
@@ -39,11 +40,28 @@ func init() {
 	content, err := ioutil.ReadFile("conf.json")
 
 	if err != nil {
-		log.Fatalf("loading configuration: %v", err)
+		log.WithField("error", err).Fatal("loading configuration")
 	}
 
 	if err := json.Unmarshal(content, &conf); err != nil {
-		log.Fatalf("loading configuration: %v", err)
+		log.WithField("error", err).Fatal("loading configuration")
+	}
+
+	switch conf.PublicAPI.LogLevel {
+	case "debug":
+		log.SetLevel(log.DebugLevel)
+	case "info":
+		log.SetLevel(log.InfoLevel)
+	case "warn":
+		log.SetLevel(log.WarnLevel)
+	case "error":
+		log.SetLevel(log.ErrorLevel)
+	case "fatal":
+		log.SetLevel(log.FatalLevel)
+	case "panic":
+		log.SetLevel(log.PanicLevel)
+	default:
+		log.SetLevel(log.WarnLevel)
 	}
 }
 

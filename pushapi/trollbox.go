@@ -2,6 +2,7 @@ package pushapi
 
 import (
 	"fmt"
+	log "logrus"
 	"sync"
 )
 
@@ -44,7 +45,7 @@ func (client *PushClient) SubscribeTrollbox() (Trollbox, error) {
 
 		tbMsg, err := convertArgsToTrollboxMessage(args)
 		if err != nil {
-			fmt.Printf("convertArgsToTrollboxMessage: %v\n", err)
+			log.WithField("error", err).Error("convertArgsToTrollboxMessage")
 			return
 		}
 
