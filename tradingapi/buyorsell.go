@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
-	"poloniex"
 	"strconv"
+	"trading/poloniex"
 )
 
 // Poloniex trading API implementation of buy and sell command.

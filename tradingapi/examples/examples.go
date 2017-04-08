@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
-	"poloniex"
-	"poloniex/tradingapi"
 	"time"
+	"trading/poloniex"
+	"trading/poloniex/tradingapi"
 )
 
 var client *tradingapi.TradingClient

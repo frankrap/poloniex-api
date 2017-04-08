@@ -2,9 +2,9 @@ package main
 
 import (
 	"log"
-	"poloniex"
-	"poloniex/publicapi"
 	"time"
+	"trading/poloniex"
+	"trading/poloniex/publicapi"
 )
 
 var client *publicapi.PublicClient
