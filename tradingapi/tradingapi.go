@@ -75,6 +75,11 @@ type configuration struct {
 // Loading configuration
 func init() {
 
+	customFormatter := new(log.TextFormatter)
+	customFormatter.TimestampFormat = "2006-01-02 15:04:05"
+	log.SetFormatter(customFormatter)
+	customFormatter.FullTimestamp = true
+
 	content, err := ioutil.ReadFile("conf.json")
 
 	if err != nil {
