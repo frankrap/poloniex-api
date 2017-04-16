@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type OpenOrders []OpenOrder
+type OpenOrders []*OpenOrder
 
 type OpenOrder struct {
 	OrderNumber    int64   `json:"orderNumber,string"`
@@ -20,7 +20,7 @@ type OpenOrder struct {
 	Margin         int     `json:"margin"`
 }
 
-type AllOpenOrders map[string]OpenOrders
+type AllOpenOrders map[string]*OpenOrders
 
 // Poloniex trading API implementation of returnOpenOrders command.
 //

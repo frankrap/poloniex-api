@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type ChartData []CandleStick
+type ChartData []*CandleStick
 
 type CandleStick struct {
 	Date            int64   `json:"date"` // Unix timestamp

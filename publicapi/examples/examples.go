@@ -28,7 +28,7 @@ func main() {
 
 	// printChartData()
 
-	//printCurrencies()
+	// printCurrencies()
 
 	// printLoanOrders()
 }

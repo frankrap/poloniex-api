@@ -219,19 +219,19 @@ func convertArgsToMarketUpdateSlice(args []interface{}) ([]*MarketUpdate, error)
 			if err := json.Unmarshal(dataField, &obm); err != nil {
 				return nil, fmt.Errorf("json.Unmarshal: %v", err)
 			}
-			marketUpdate.Data = obm
+			marketUpdate.Data = &obm
 		case "orderBookRemove":
 			obr := OrderBookRemove{}
 			if err := json.Unmarshal(dataField, &obr); err != nil {
 				return nil, fmt.Errorf("json.Unmarshal: %v", err)
 			}
-			marketUpdate.Data = obr
+			marketUpdate.Data = &obr
 		case "newTrade":
 			nt := NewTrade{}
 			if err := json.Unmarshal(dataField, &nt); err != nil {
 				return nil, fmt.Errorf("json.Unmarshal: %v", err)
 			}
-			marketUpdate.Data = nt
+			marketUpdate.Data = &nt
 		}
 
 		res[i] = &marketUpdate

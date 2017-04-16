@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type TradesFromOrder []TradeFromOrder
+type TradesFromOrder []*TradeFromOrder
 
 type TradeFromOrder struct {
 	GlobalTradeId int64   `json:"globalTradeID"`

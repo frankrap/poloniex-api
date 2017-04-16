@@ -7,11 +7,11 @@ import (
 	"strings"
 )
 
-type OrderBooks map[string]OrderBook
+type OrderBooks map[string]*OrderBook
 
 type OrderBook struct {
-	Asks     []Order `json:"asks"`
-	Bids     []Order `json:"bids"`
+	Asks     []*Order `json:"asks"`
+	Bids     []*Order `json:"bids"`
 	IsFrozen bool
 	Seq      int64
 }

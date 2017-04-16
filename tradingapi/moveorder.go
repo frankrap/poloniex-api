@@ -36,9 +36,9 @@ import (
 //    }
 //  }
 type MovedOrder struct {
-	Success         bool                                 `json:"success"`
-	OrderNumber     int64                                `json:"orderNumber,string"`
-	ResultingTrades map[string][]poloniex.ResultingTrade `json:"resultingTrades"`
+	Success         bool                                  `json:"success"`
+	OrderNumber     int64                                 `json:"orderNumber,string"`
+	ResultingTrades map[string][]*poloniex.ResultingTrade `json:"resultingTrades"`
 }
 
 func (client *TradingClient) MoveOrderPostOnly(orderNumber int64, rate, amount float64) (*MovedOrder, error) {

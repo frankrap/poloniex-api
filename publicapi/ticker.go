@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-type Ticks map[string]Tick
+type Ticks map[string]*Tick
 
 type Tick struct {
 	Id            int     `json:"id"`

@@ -6,7 +6,7 @@ import (
 	"net/url"
 )
 
-type CompleteBalances map[string]CompleteBalance
+type CompleteBalances map[string]*CompleteBalance
 
 type CompleteBalance struct {
 	Available float64 `json:"available,string"`

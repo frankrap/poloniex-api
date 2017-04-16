@@ -7,8 +7,8 @@ import (
 )
 
 type LoanOrders struct {
-	Offers  []LoanOrder `json:"offers"`
-	Demands []LoanOrder `json:"demands"`
+	Offers  []*LoanOrder `json:"offers"`
+	Demands []*LoanOrder `json:"demands"`
 }
 
 type LoanOrder struct {

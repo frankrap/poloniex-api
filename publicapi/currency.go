@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-type Currencies map[string]Currency
+type Currencies map[string]*Currency
 
 type Currency struct {
 	Id             int     `json:"id"`
@@ -96,7 +96,7 @@ func (c *Currency) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (collection Currencies) Filter(f func(Currency) bool) Currencies {
+func (collection Currencies) Filter(f func(*Currency) bool) Currencies {
 
 	res := make(Currencies)
 

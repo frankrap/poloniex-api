@@ -9,8 +9,8 @@ import (
 )
 
 type DepositsWithdrawals struct {
-	Deposits    []DepositHistory
-	Withdrawals []WithdrawalHistory
+	Deposits    []*DepositHistory
+	Withdrawals []*WithdrawalHistory
 }
 
 type DepositHistory struct {

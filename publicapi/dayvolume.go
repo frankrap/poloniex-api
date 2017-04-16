@@ -7,7 +7,7 @@ import (
 )
 
 type DayVolumes struct {
-	DayVolumes      map[string]DayVolume
+	DayVolumes      map[string]*DayVolume
 	PrimaryCurrency map[string]float64
 }
 
@@ -65,7 +65,7 @@ func (dv *DayVolumes) UnmarshalJSON(data []byte) error {
 		return fmt.Errorf("json.Unmarshal: %v", err)
 	}
 
-	dv.DayVolumes = make(map[string]DayVolume)
+	dv.DayVolumes = make(map[string]*DayVolume)
 	dv.PrimaryCurrency = make(map[string]float64)
 
 	for key, value := range adv {
@@ -94,7 +94,7 @@ func (dv *DayVolumes) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func convertToDayVolume(value map[string]interface{}) (DayVolume, error) {
+func convertToDayVolume(value map[string]interface{}) (*DayVolume, error) {
 
 	dv := make(DayVolume)
 	for k, v := range value {
@@ -111,5 +111,5 @@ func convertToDayVolume(value map[string]interface{}) (DayVolume, error) {
 			return nil, fmt.Errorf("Type error: %v", v)
 		}
 	}
-	return dv, nil
+	return &dv, nil
 }
