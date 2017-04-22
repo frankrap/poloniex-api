@@ -52,6 +52,8 @@ func (client *PushClient) SubscribeTicker() (Ticker, error) {
 
 	handler := func(args []interface{}, kwargs map[string]interface{}) {
 
+		client.updateMsgCount()
+
 		tick, err := convertArgsToTick(args)
 		if err != nil {
 			log.WithField("error", err).Error("convertArgstoTick")
@@ -66,8 +68,21 @@ func (client *PushClient) SubscribeTicker() (Ticker, error) {
 		tickerMu.RUnlock()
 	}
 
-	if err := client.wampClient.Subscribe(TICKER, nil, handler); err != nil {
-		return nil, fmt.Errorf("turnpike.Client.Subscribe: %v", err)
+	subscribe := func() error {
+
+		client.wampClientMu.RLock()
+		defer client.wampClientMu.RUnlock()
+
+		if err := client.wampClient.Subscribe(TICKER, nil, handler); err != nil {
+			return fmt.Errorf("turnpike.Client.Subscribe: %v", err)
+		}
+		log.Infof("Subscribed to: %s", TICKER)
+
+		return nil
+	}
+
+	if err := subscribe(); err != nil {
+		return nil, err
 	}
 
 	tickerMu.Lock()
@@ -78,18 +93,25 @@ func (client *PushClient) SubscribeTicker() (Ticker, error) {
 	}
 	tickerMu.Unlock()
 
+	client.addSubscription(TICKER, subscribe)
+
 	return ticker, nil
 }
 
 func (client *PushClient) UnsubscribeTicker() error {
 
+	client.wampClientMu.RLock()
+	defer client.wampClientMu.RUnlock()
+
 	if err := client.wampClient.Unsubscribe(TICKER); err != nil {
 		return fmt.Errorf("turnpike.Client.Unsuscribe: %v", err)
 	}
 
+	client.removeSubscription(TICKER)
+
 	tickerMu.RLock()
 	close(tickerUnsubscribed)
-	defer tickerMu.RUnlock()
+	tickerMu.RUnlock()
 
 	return nil
 }

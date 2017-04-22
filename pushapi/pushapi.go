@@ -13,6 +13,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strconv"
+	"sync"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	turnpike "gopkg.in/jcelliott/turnpike.v2"
@@ -21,14 +23,25 @@ import (
 var conf *configuration
 
 type PushClient struct {
-	wampClient *turnpike.Client
+	wampClientMu sync.RWMutex
+	wampClient   *turnpike.Client
+	subscription map[string]func() error
+
+	mc *msgCount
+}
+
+type msgCount struct {
+	sync.Mutex
+	count         uint64
+	lastTimestamp time.Time
 }
 
 type configuration struct {
 	PushAPI struct {
-		WssUri   string `json:"wss_uri"`
-		Realm    string `json:"realm"`
-		LogLevel string `json:"log_level"`
+		WssUri     string `json:"wss_uri"`
+		Realm      string `json:"realm"`
+		LogLevel   string `json:"log_level"`
+		TimeoutSec int    `json:"timeout_sec"`
 	} `json:"push_api"`
 }
 
@@ -81,21 +94,105 @@ func NewPushClient() (*PushClient, error) {
 		return nil, fmt.Errorf("turnpike.Client.JoinRealm: %v", err)
 	}
 
-	return &PushClient{client}, nil
+	res := &PushClient{sync.RWMutex{}, client, make(map[string]func() error), &msgCount{}}
+	go res.autoReconnect(time.Duration(conf.PushAPI.TimeoutSec) * time.Second)
+
+	return res, nil
 }
 
-func (client *PushClient) LeaveRealm() error {
+func (client *PushClient) autoReconnect(timeout time.Duration) {
 
-	if err := client.wampClient.LeaveRealm(); err != nil {
-		return fmt.Errorf("turnpike.Client.LeaveRealm: %v", err)
+	for {
+
+		time.Sleep(timeout)
+
+		client.mc.Lock()
+		count := client.mc.count
+		lastTimestamp := client.mc.lastTimestamp
+		client.mc.Unlock()
+
+		if count > 0 && time.Since(lastTimestamp) > timeout {
+
+			log.Warn("Auto reconnecting...")
+			var err error
+
+			if err = client.Close(); err != nil {
+				log.WithField("error", err).Error("pushapi.autoReconnect: PushClient.Close")
+			}
+
+			client.wampClientMu.Lock()
+
+			for {
+
+				time.Sleep(5 * time.Second)
+				client.wampClient, err = turnpike.NewWebsocketClient(turnpike.JSON, conf.PushAPI.WssUri, nil, nil)
+
+				if err != nil {
+					log.WithField("error", err).Error("pushapi.autoReconnect: turnpike.NewWebsocketClient")
+					continue
+				}
+
+				_, err = client.wampClient.JoinRealm(conf.PushAPI.Realm, nil)
+				if err != nil {
+					log.WithField("error", err).Error("pushapi.autoReconnect: turnpike.Client.JoinRealm")
+					continue
+				}
+
+				client.mc.Lock()
+				client.mc.count = 0
+				client.mc.Unlock()
+				break
+			}
+
+			subscribes := make(map[string]func() error)
+			for topic, subscribe := range client.subscription {
+				subscribes[topic] = subscribe
+			}
+			client.wampClientMu.Unlock()
+
+			log.WithField("subscriptions", subscribes).Infof("Resubscribing %d topics", len(subscribes))
+
+			for _, subscribe := range subscribes {
+				if err = subscribe(); err != nil {
+					log.WithField("error", err).Error("pushapi.autoReconnect: subscribe")
+				}
+			}
+		}
 	}
-	return nil
+}
+
+func (client *PushClient) addSubscription(topic string, subscribe func() error) {
+
+	client.wampClientMu.Lock()
+	defer client.wampClientMu.Unlock()
+
+	client.subscription[topic] = subscribe
+}
+
+func (client *PushClient) removeSubscription(topic string) {
+
+	client.wampClientMu.Lock()
+	defer client.wampClientMu.Unlock()
+
+	delete(client.subscription, topic)
+}
+
+func (client *PushClient) updateMsgCount() {
+
+	client.mc.Lock()
+	defer client.mc.Unlock()
+
+	client.mc.count++
+	client.mc.lastTimestamp = time.Now()
 }
 
 func (client *PushClient) Close() error {
 
+	client.wampClientMu.RLock()
+	defer client.wampClientMu.RUnlock()
+
 	if err := client.wampClient.Close(); err != nil {
-		return fmt.Errorf("turnpike.Client.LeaveRealm: %v", err)
+		return fmt.Errorf("turnpike.Client.Close: %v", err)
 	}
 	return nil
 }

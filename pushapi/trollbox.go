@@ -44,6 +44,8 @@ func (client *PushClient) SubscribeTrollbox() (Trollbox, error) {
 
 	handler := func(args []interface{}, kwargs map[string]interface{}) {
 
+		client.updateMsgCount()
+
 		tbMsg, err := convertArgsToTrollboxMessage(args)
 		if err != nil {
 			log.WithField("error", err).Error("convertArgsToTrollboxMessage")
@@ -58,8 +60,21 @@ func (client *PushClient) SubscribeTrollbox() (Trollbox, error) {
 		trollboxMu.RUnlock()
 	}
 
-	if err := client.wampClient.Subscribe(TROLLBOX, nil, handler); err != nil {
-		return nil, fmt.Errorf("turnpike.Client.Subscribe: %v", err)
+	subscribe := func() error {
+
+		client.wampClientMu.RLock()
+		defer client.wampClientMu.RUnlock()
+
+		if err := client.wampClient.Subscribe(TROLLBOX, nil, handler); err != nil {
+			return fmt.Errorf("turnpike.Client.Subscribe: %v", err)
+		}
+		log.Infof("Subscribed to: %s", TROLLBOX)
+
+		return nil
+	}
+
+	if err := subscribe(); err != nil {
+		return nil, err
 	}
 
 	trollboxMu.Lock()
@@ -70,14 +85,21 @@ func (client *PushClient) SubscribeTrollbox() (Trollbox, error) {
 	}
 	trollboxMu.Unlock()
 
+	client.addSubscription(TROLLBOX, subscribe)
+
 	return trollbox, nil
 }
 
 func (client *PushClient) UnsubscribeTrollbox() error {
 
+	client.wampClientMu.RLock()
+	defer client.wampClientMu.RUnlock()
+
 	if err := client.wampClient.Unsubscribe(TROLLBOX); err != nil {
 		return fmt.Errorf("turnpike.Client.Unsuscribe: %v", err)
 	}
+
+	client.removeSubscription(TROLLBOX)
 
 	trollboxMu.RLock()
 	close(trollboxUnsubscribed)

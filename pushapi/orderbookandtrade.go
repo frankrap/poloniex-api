@@ -39,7 +39,6 @@ type NewTrade struct {
 	TypeOrder string  `json:"type"`
 }
 
-// Not concurrency safe
 type MarketUpdater chan *MarketUpdates
 
 type marketUpdaterInfo struct {
@@ -118,6 +117,8 @@ func (client *PushClient) SubscribeMarket(currencyPair string) (MarketUpdater, e
 
 	handler := func(args []interface{}, kwargs map[string]interface{}) {
 
+		client.updateMsgCount()
+
 		seq, ok := kwargs["seq"].(float64)
 		if !ok {
 			fmt.Printf("'seq' type assertion failed")
@@ -148,8 +149,21 @@ func (client *PushClient) SubscribeMarket(currencyPair string) (MarketUpdater, e
 		updaterInfo.mu.RUnlock()
 	}
 
-	if err := client.wampClient.Subscribe(currencyPair, nil, handler); err != nil {
-		return nil, fmt.Errorf("turnpike.Client.Subscribe: %v", err)
+	subscribe := func() error {
+
+		client.wampClientMu.RLock()
+		defer client.wampClientMu.RUnlock()
+
+		if err := client.wampClient.Subscribe(currencyPair, nil, handler); err != nil {
+			return fmt.Errorf("turnpike.Client.Subscribe: %v", err)
+		}
+		log.Infof("Subscribed to: %s", currencyPair)
+
+		return nil
+	}
+
+	if err := subscribe(); err != nil {
+		return nil, err
 	}
 
 	mutex.Lock()
@@ -172,14 +186,21 @@ func (client *PushClient) SubscribeMarket(currencyPair string) (MarketUpdater, e
 	}
 	updaterInfo.mu.Unlock()
 
+	client.addSubscription(currencyPair, subscribe)
+
 	return updaterInfo.updater, nil
 }
 
 func (client *PushClient) UnsubscribeMarket(currencyPair string) error {
 
+	client.wampClientMu.RLock()
+	defer client.wampClientMu.RUnlock()
+
 	if err := client.wampClient.Unsubscribe(currencyPair); err != nil {
 		return fmt.Errorf("turnpike.Client.Unsuscribe: %v", err)
 	}
+
+	client.removeSubscription(currencyPair)
 
 	mutex.RLock()
 	updaterInfo := marketUpdaterInfos[currencyPair]
