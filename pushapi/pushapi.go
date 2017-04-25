@@ -37,12 +37,14 @@ type msgCount struct {
 }
 
 type configuration struct {
-	PushAPI struct {
-		WssUri     string `json:"wss_uri"`
-		Realm      string `json:"realm"`
-		LogLevel   string `json:"log_level"`
-		TimeoutSec int    `json:"timeout_sec"`
-	} `json:"push_api"`
+	PushAPIConf `json:"poloniex_push_api"`
+}
+
+type PushAPIConf struct {
+	WssUri     string `json:"wss_uri"`
+	Realm      string `json:"realm"`
+	LogLevel   string `json:"log_level"`
+	TimeoutSec int    `json:"timeout_sec"`
 }
 
 func init() {
@@ -61,7 +63,7 @@ func init() {
 		log.WithField("error", err).Fatal("loading configuration")
 	}
 
-	switch conf.PushAPI.LogLevel {
+	switch conf.LogLevel {
 	case "debug":
 		turnpike.Debug()
 		log.SetLevel(log.DebugLevel)
@@ -83,19 +85,24 @@ func init() {
 func NewPushClient() (*PushClient, error) {
 
 	client, err := turnpike.NewWebsocketClient(turnpike.JSON,
-		conf.PushAPI.WssUri, nil, nil)
+		conf.WssUri, nil, nil)
 
 	if err != nil {
 		return nil, fmt.Errorf("turnpike.NewWebsocketClient: %v", err)
 	}
 
-	_, err = client.JoinRealm(conf.PushAPI.Realm, nil)
+	_, err = client.JoinRealm(conf.Realm, nil)
 	if err != nil {
 		return nil, fmt.Errorf("turnpike.Client.JoinRealm: %v", err)
 	}
 
-	res := &PushClient{sync.RWMutex{}, client, make(map[string]func() error), &msgCount{}}
-	go res.autoReconnect(time.Duration(conf.PushAPI.TimeoutSec) * time.Second)
+	res := &PushClient{
+		sync.RWMutex{},
+		client,
+		make(map[string]func() error), &msgCount{},
+	}
+
+	go res.autoReconnect(time.Duration(conf.TimeoutSec) * time.Second)
 
 	return res, nil
 }
@@ -125,14 +132,14 @@ func (client *PushClient) autoReconnect(timeout time.Duration) {
 			for {
 
 				time.Sleep(5 * time.Second)
-				client.wampClient, err = turnpike.NewWebsocketClient(turnpike.JSON, conf.PushAPI.WssUri, nil, nil)
+				client.wampClient, err = turnpike.NewWebsocketClient(turnpike.JSON, conf.WssUri, nil, nil)
 
 				if err != nil {
 					log.WithField("error", err).Error("pushapi.autoReconnect: turnpike.NewWebsocketClient")
 					continue
 				}
 
-				_, err = client.wampClient.JoinRealm(conf.PushAPI.Realm, nil)
+				_, err = client.wampClient.JoinRealm(conf.Realm, nil)
 				if err != nil {
 					log.WithField("error", err).Error("pushapi.autoReconnect: turnpike.Client.JoinRealm")
 					continue

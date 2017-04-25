@@ -62,14 +62,16 @@ type APIError struct {
 }
 
 type configuration struct {
-	TradingAPI struct {
-		TradingAPIUrl        string `json:"trading_api_url"`
-		HTTPClientTimeoutSec int    `json:"httpclient_timeout_sec"`
-		MaxRequestsSec       int    `json:"max_requests_sec"`
-		ApiKey               string `json:"api_key"`
-		ApiSecret            string `json:"api_secret"`
-		LogLevel             string `json:"log_level"`
-	} `json:"trading_api"`
+	TradingAPIConf `json:"poloniex_trading_api"`
+}
+
+type TradingAPIConf struct {
+	TradingAPIUrl        string `json:"trading_api_url"`
+	HTTPClientTimeoutSec int    `json:"httpclient_timeout_sec"`
+	MaxRequestsSec       int    `json:"max_requests_sec"`
+	ApiKey               string `json:"api_key"`
+	ApiSecret            string `json:"api_secret"`
+	LogLevel             string `json:"log_level"`
 }
 
 // Loading configuration
@@ -89,7 +91,7 @@ func init() {
 		log.WithField("error", err).Fatal("loading configuration")
 	}
 
-	switch conf.TradingAPI.LogLevel {
+	switch conf.LogLevel {
 	case "debug":
 		log.SetLevel(log.DebugLevel)
 	case "info":
@@ -110,24 +112,21 @@ func init() {
 // NewTradingClient returns a newly configured client
 func NewTradingClient() (*TradingClient, error) {
 
-	reqInterval := 1000 * time.Millisecond /
-		time.Duration(conf.TradingAPI.MaxRequestsSec)
+	reqInterval := 1000 * time.Millisecond / time.Duration(conf.MaxRequestsSec)
 
 	client := http.Client{
-		Timeout: time.Duration(conf.TradingAPI.HTTPClientTimeoutSec) *
-			time.Second,
+		Timeout: time.Duration(conf.HTTPClientTimeoutSec) * time.Second,
 	}
 
-	if len(conf.TradingAPI.ApiKey) == 0 ||
-		len(conf.TradingAPI.ApiSecret) == 0 {
+	if len(conf.ApiKey) == 0 || len(conf.ApiSecret) == 0 {
 
 		err := errors.New("new trading client: wrong apikey and/or apisecret")
 		return nil, err
 	}
 
 	tc := TradingClient{
-		conf.TradingAPI.ApiKey,
-		conf.TradingAPI.ApiSecret,
+		conf.ApiKey,
+		conf.ApiSecret,
 		&client,
 		time.Tick(reqInterval),
 	}
@@ -142,7 +141,7 @@ func (c *TradingClient) do(form url.Values) ([]byte, error) {
 	form.Add("nonce", strconv.Itoa(int(nonce)))
 
 	req, err := http.NewRequest("POST",
-		conf.TradingAPI.TradingAPIUrl,
+		conf.TradingAPIUrl,
 		strings.NewReader(form.Encode()))
 
 	if err != nil {

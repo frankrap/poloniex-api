@@ -28,12 +28,14 @@ type PublicClient struct {
 }
 
 type configuration struct {
-	PublicAPI struct {
-		PublicAPIUrl         string `json:"public_api_url"`
-		HTTPClientTimeoutSec int    `json:"httpclient_timeout_sec"`
-		MaxRequestsSec       int    `json:"max_requests_sec"`
-		LogLevel             string `json:"log_level"`
-	} `json:"public_api"`
+	PublicAPIConf `json:"poloniex_public_api"`
+}
+
+type PublicAPIConf struct {
+	PublicAPIUrl         string `json:"public_api_url"`
+	HTTPClientTimeoutSec int    `json:"httpclient_timeout_sec"`
+	MaxRequestsSec       int    `json:"max_requests_sec"`
+	LogLevel             string `json:"log_level"`
 }
 
 func init() {
@@ -52,7 +54,7 @@ func init() {
 		log.WithField("error", err).Fatal("loading configuration")
 	}
 
-	switch conf.PublicAPI.LogLevel {
+	switch conf.LogLevel {
 	case "debug":
 		log.SetLevel(log.DebugLevel)
 	case "info":
@@ -73,12 +75,10 @@ func init() {
 // NewPublicClient returns a newly configured client
 func NewPublicClient() *PublicClient {
 
-	reqInterval := 1000 * time.Millisecond /
-		time.Duration(conf.PublicAPI.MaxRequestsSec)
+	reqInterval := 1000 * time.Millisecond / time.Duration(conf.MaxRequestsSec)
 
 	client := http.Client{
-		Timeout: time.Duration(conf.PublicAPI.HTTPClientTimeoutSec) *
-			time.Second,
+		Timeout: time.Duration(conf.HTTPClientTimeoutSec) * time.Second,
 	}
 
 	return &PublicClient{&client, time.Tick(reqInterval)}
@@ -131,7 +131,7 @@ func (c *PublicClient) do(params map[string]string) ([]byte, error) {
 
 func buildUrl(params map[string]string) string {
 
-	u := conf.PublicAPI.PublicAPIUrl + "?"
+	u := conf.PublicAPIUrl + "?"
 
 	var parameters []string
 	for k, v := range params {
