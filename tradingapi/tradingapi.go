@@ -84,7 +84,7 @@ func init() {
 	customFormatter.FullTimestamp = true
 	logrus.SetFormatter(customFormatter)
 
-	logger = logrus.WithField("context", "[tradingapi]")
+	logger = logrus.WithField("context", "[api:poloniex:tradingapi]")
 
 	content, err := ioutil.ReadFile("conf.json")
 

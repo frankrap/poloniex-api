@@ -2,6 +2,7 @@
     "poloniex_push_api": {
         "wss_uri": "wss://api.poloniex.com",
         "realm": "realm1",
-        "log_level": "debug"
+        "log_level": "debug",
+        "timeout_sec": 30
     }
 }

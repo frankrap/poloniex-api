@@ -56,7 +56,7 @@ func init() {
 	customFormatter.FullTimestamp = true
 	logrus.SetFormatter(customFormatter)
 
-	logger = logrus.WithField("context", "[pushapi]")
+	logger = logrus.WithField("context", "[api:poloniex:pushapi]")
 
 	content, err := ioutil.ReadFile("conf.json")
 

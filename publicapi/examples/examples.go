@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 	"time"
-	"trading/poloniex"
-	"trading/poloniex/publicapi"
+	"trading/api/poloniex"
+	"trading/api/poloniex/publicapi"
 )
 
 var client *publicapi.PublicClient

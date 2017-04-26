@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 	"time"
-	"trading/poloniex"
-	"trading/poloniex/pushapi"
+	"trading/api/poloniex"
+	"trading/api/poloniex/pushapi"
 )
 
 var client *pushapi.PushClient
