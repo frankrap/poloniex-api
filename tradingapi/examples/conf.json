@@ -1,6 +1,6 @@
 {
     "poloniex_trading_api": {
-        "trading_api_url": "https://poloniex.com/tradingApi",
+        "api_url": "https://poloniex.com/tradingApi",
         "httpclient_timeout_sec": 10,
         "max_requests_sec": 5,
         "api_key": "",

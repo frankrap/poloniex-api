@@ -69,7 +69,7 @@ type configuration struct {
 }
 
 type TradingAPIConf struct {
-	TradingAPIUrl        string `json:"trading_api_url"`
+	APIUrl               string `json:"api_url"`
 	HTTPClientTimeoutSec int    `json:"httpclient_timeout_sec"`
 	MaxRequestsSec       int    `json:"max_requests_sec"`
 	ApiKey               string `json:"api_key"`
@@ -146,7 +146,7 @@ func (c *TradingClient) do(form url.Values) ([]byte, error) {
 	form.Add("nonce", strconv.Itoa(int(nonce)))
 
 	req, err := http.NewRequest("POST",
-		conf.TradingAPIUrl,
+		conf.APIUrl,
 		strings.NewReader(form.Encode()))
 
 	if err != nil {

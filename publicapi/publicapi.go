@@ -35,7 +35,7 @@ type configuration struct {
 }
 
 type PublicAPIConf struct {
-	PublicAPIUrl         string `json:"public_api_url"`
+	APIUrl               string `json:"api_url"`
 	HTTPClientTimeoutSec int    `json:"httpclient_timeout_sec"`
 	MaxRequestsSec       int    `json:"max_requests_sec"`
 	LogLevel             string `json:"log_level"`
@@ -136,7 +136,7 @@ func (c *PublicClient) do(params map[string]string) ([]byte, error) {
 
 func buildUrl(params map[string]string) string {
 
-	u := conf.PublicAPIUrl + "?"
+	u := conf.APIUrl + "?"
 
 	var parameters []string
 	for k, v := range params {
