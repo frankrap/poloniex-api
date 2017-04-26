@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"sync"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type MarketUpdates struct {
@@ -133,7 +131,7 @@ func (client *PushClient) SubscribeMarket(currencyPair string) (MarketUpdater, e
 
 		updates, err := convertArgsToMarketUpdateSlice(args)
 		if err != nil {
-			log.WithField("error", err).Error("convertArgsToMarketUpdateSlice")
+			logger.WithField("error", err).Error("convertArgsToMarketUpdateSlice")
 			return
 		}
 
@@ -157,7 +155,7 @@ func (client *PushClient) SubscribeMarket(currencyPair string) (MarketUpdater, e
 		if err := client.wampClient.Subscribe(currencyPair, nil, handler); err != nil {
 			return fmt.Errorf("turnpike.Client.Subscribe: %v", err)
 		}
-		log.Infof("Subscribed to: %s", currencyPair)
+		logger.Infof("Subscribed to: %s", currencyPair)
 
 		return nil
 	}

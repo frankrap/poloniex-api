@@ -16,11 +16,14 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/Sirupsen/logrus"
 	turnpike "gopkg.in/jcelliott/turnpike.v2"
 )
 
-var conf *configuration
+var (
+	conf   *configuration
+	logger *logrus.Entry
+)
 
 type PushClient struct {
 	wampClientMu sync.RWMutex
@@ -49,36 +52,38 @@ type PushAPIConf struct {
 
 func init() {
 
-	customFormatter := new(log.TextFormatter)
+	customFormatter := new(logrus.TextFormatter)
 	customFormatter.FullTimestamp = true
-	log.SetFormatter(customFormatter)
+	logrus.SetFormatter(customFormatter)
+
+	logger = logrus.WithField("context", "[pushapi]")
 
 	content, err := ioutil.ReadFile("conf.json")
 
 	if err != nil {
-		log.WithField("error", err).Fatal("loading configuration")
+		logger.WithField("error", err).Fatal("loading configuration")
 	}
 
 	if err := json.Unmarshal(content, &conf); err != nil {
-		log.WithField("error", err).Fatal("loading configuration")
+		logger.WithField("error", err).Fatal("loading configuration")
 	}
 
 	switch conf.LogLevel {
 	case "debug":
 		turnpike.Debug()
-		log.SetLevel(log.DebugLevel)
+		logrus.SetLevel(logrus.DebugLevel)
 	case "info":
-		log.SetLevel(log.InfoLevel)
+		logrus.SetLevel(logrus.InfoLevel)
 	case "warn":
-		log.SetLevel(log.WarnLevel)
+		logrus.SetLevel(logrus.WarnLevel)
 	case "error":
-		log.SetLevel(log.ErrorLevel)
+		logrus.SetLevel(logrus.ErrorLevel)
 	case "fatal":
-		log.SetLevel(log.FatalLevel)
+		logrus.SetLevel(logrus.FatalLevel)
 	case "panic":
-		log.SetLevel(log.PanicLevel)
+		logrus.SetLevel(logrus.PanicLevel)
 	default:
-		log.SetLevel(log.WarnLevel)
+		logrus.SetLevel(logrus.WarnLevel)
 	}
 }
 
@@ -120,11 +125,11 @@ func (client *PushClient) autoReconnect(timeout time.Duration) {
 
 		if count > 0 && time.Since(lastTimestamp) > timeout {
 
-			log.Warn("Auto reconnecting...")
+			logger.Warn("Auto reconnecting...")
 			var err error
 
 			if err = client.Close(); err != nil {
-				log.WithField("error", err).Error("pushapi.autoReconnect: PushClient.Close")
+				logger.WithField("error", err).Error("PushClient.autoReconnect: PushClient.Close")
 			}
 
 			client.wampClientMu.Lock()
@@ -135,13 +140,13 @@ func (client *PushClient) autoReconnect(timeout time.Duration) {
 				client.wampClient, err = turnpike.NewWebsocketClient(turnpike.JSON, conf.WssUri, nil, nil)
 
 				if err != nil {
-					log.WithField("error", err).Error("pushapi.autoReconnect: turnpike.NewWebsocketClient")
+					logger.WithField("error", err).Error("PushClient.autoReconnect: turnpike.NewWebsocketClient")
 					continue
 				}
 
 				_, err = client.wampClient.JoinRealm(conf.Realm, nil)
 				if err != nil {
-					log.WithField("error", err).Error("pushapi.autoReconnect: turnpike.Client.JoinRealm")
+					logger.WithField("error", err).Error("PushClient.autoReconnect: turnpike.Client.JoinRealm")
 					continue
 				}
 
@@ -157,11 +162,11 @@ func (client *PushClient) autoReconnect(timeout time.Duration) {
 			}
 			client.wampClientMu.Unlock()
 
-			log.WithField("subscriptions", subscribes).Infof("Resubscribing %d topics", len(subscribes))
+			logger.WithField("subscriptions", subscribes).Infof("Resubscribing %d topics", len(subscribes))
 
 			for _, subscribe := range subscribes {
 				if err = subscribe(); err != nil {
-					log.WithField("error", err).Error("pushapi.autoReconnect: subscribe")
+					logger.WithField("error", err).Error("PushClient.autoReconnect: subscribe")
 				}
 			}
 		}

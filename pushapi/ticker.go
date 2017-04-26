@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"sync"
-
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -56,7 +54,7 @@ func (client *PushClient) SubscribeTicker() (Ticker, error) {
 
 		tick, err := convertArgsToTick(args)
 		if err != nil {
-			log.WithField("error", err).Error("convertArgstoTick")
+			logger.WithField("error", err).Error("convertArgstoTick")
 			return
 		}
 
@@ -76,7 +74,7 @@ func (client *PushClient) SubscribeTicker() (Ticker, error) {
 		if err := client.wampClient.Subscribe(TICKER, nil, handler); err != nil {
 			return fmt.Errorf("turnpike.Client.Subscribe: %v", err)
 		}
-		log.Infof("Subscribed to: %s", TICKER)
+		logger.Infof("Subscribed to: %s", TICKER)
 
 		return nil
 	}

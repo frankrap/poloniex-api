@@ -3,8 +3,6 @@ package pushapi
 import (
 	"fmt"
 	"sync"
-
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -48,7 +46,7 @@ func (client *PushClient) SubscribeTrollbox() (Trollbox, error) {
 
 		tbMsg, err := convertArgsToTrollboxMessage(args)
 		if err != nil {
-			log.WithField("error", err).Error("convertArgsToTrollboxMessage")
+			logger.WithField("error", err).Error("convertArgsToTrollboxMessage")
 			return
 		}
 
@@ -68,7 +66,7 @@ func (client *PushClient) SubscribeTrollbox() (Trollbox, error) {
 		if err := client.wampClient.Subscribe(TROLLBOX, nil, handler); err != nil {
 			return fmt.Errorf("turnpike.Client.Subscribe: %v", err)
 		}
-		log.Infof("Subscribed to: %s", TROLLBOX)
+		logger.Infof("Subscribed to: %s", TROLLBOX)
 
 		return nil
 	}
