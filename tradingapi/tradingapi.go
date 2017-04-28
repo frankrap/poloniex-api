@@ -48,12 +48,6 @@ var (
 	logger *logrus.Entry
 )
 
-const (
-	TRADING_API_URL            = "https://poloniex.com/tradingApi"
-	DEFAULT_HTTPCLIENT_TIMEOUT = 10
-	MAX_REQUEST_PER_SECOND     = 5
-)
-
 type Client struct {
 	apiKey     string
 	apiSecret  string
