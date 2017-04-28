@@ -40,7 +40,7 @@ type AccountBalances map[string]float64
 //      "LTC": "11.99936230"
 //    }
 //  }
-func (client *TradingClient) GetAvailableAccountBalances() (*AvailableAccountBalances, error) {
+func (client *Client) GetAvailableAccountBalances() (*AvailableAccountBalances, error) {
 
 	postParameters := url.Values{}
 	postParameters.Add("command", "returnAvailableAccountBalances")
@@ -59,7 +59,7 @@ func (client *TradingClient) GetAvailableAccountBalances() (*AvailableAccountBal
 	return &res, nil
 }
 
-func (client *TradingClient) GetAccountBalances(account string) (AccountBalances, error) {
+func (client *Client) GetAccountBalances(account string) (AccountBalances, error) {
 
 	postParameters := url.Values{}
 	postParameters.Add("command", "returnAvailableAccountBalances")

@@ -38,7 +38,7 @@ var (
 // Example:
 //
 // ['trollboxMessage',2094211,'boxOfTroll','Trololol',4]
-func (client *PushClient) SubscribeTrollbox() (Trollbox, error) {
+func (client *Client) SubscribeTrollbox() (Trollbox, error) {
 
 	handler := func(args []interface{}, kwargs map[string]interface{}) {
 
@@ -88,7 +88,7 @@ func (client *PushClient) SubscribeTrollbox() (Trollbox, error) {
 	return trollbox, nil
 }
 
-func (client *PushClient) UnsubscribeTrollbox() error {
+func (client *Client) UnsubscribeTrollbox() error {
 
 	client.wampClientMu.RLock()
 	defer client.wampClientMu.RUnlock()

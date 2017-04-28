@@ -25,16 +25,16 @@ var (
 	logger *logrus.Entry
 )
 
-type PublicClient struct {
+type Client struct {
 	httpClient *http.Client
 	throttle   <-chan time.Time
 }
 
 type configuration struct {
-	PublicAPIConf `json:"poloniex_public_api"`
+	apiConf `json:"poloniex_public_api"`
 }
 
-type PublicAPIConf struct {
+type apiConf struct {
 	APIUrl               string `json:"api_url"`
 	HTTPClientTimeoutSec int    `json:"httpclient_timeout_sec"`
 	MaxRequestsSec       int    `json:"max_requests_sec"`
@@ -77,8 +77,8 @@ func init() {
 	}
 }
 
-// NewPublicClient returns a newly configured client
-func NewPublicClient() *PublicClient {
+// NewClient returns a newly configured client
+func NewClient() *Client {
 
 	reqInterval := 1000 * time.Millisecond / time.Duration(conf.MaxRequestsSec)
 
@@ -86,11 +86,11 @@ func NewPublicClient() *PublicClient {
 		Timeout: time.Duration(conf.HTTPClientTimeoutSec) * time.Second,
 	}
 
-	return &PublicClient{&client, time.Tick(reqInterval)}
+	return &Client{&client, time.Tick(reqInterval)}
 }
 
 // Do prepares and executes api call requests.
-func (c *PublicClient) do(params map[string]string) ([]byte, error) {
+func (c *Client) do(params map[string]string) ([]byte, error) {
 
 	url := buildUrl(params)
 

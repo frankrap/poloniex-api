@@ -39,7 +39,7 @@ type Currency struct {
 //      "frozen": 0
 //    }, ...
 //  }
-func (client *PublicClient) GetCurrencies() (Currencies, error) {
+func (client *Client) GetCurrencies() (Currencies, error) {
 
 	params := map[string]string{
 		"command": "returnCurrencies",

@@ -37,7 +37,7 @@ type DayVolume map[string]float64
 //    "totalXMR": "3675.72265894",
 //    "totalXUSD": "0.00000000"
 //  }
-func (client *PublicClient) GetDayVolumes() (*DayVolumes, error) {
+func (client *Client) GetDayVolumes() (*DayVolumes, error) {
 
 	params := map[string]string{
 		"command": "return24hVolume",

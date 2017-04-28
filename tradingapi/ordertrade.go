@@ -55,7 +55,7 @@ type TradeFromOrder struct {
 //      "date": "2017-03-18 06:28:20"
 //    }
 //  ]
-func (client *TradingClient) GetTradesFromOrder(orderNumber int64) (TradesFromOrder, error) {
+func (client *Client) GetTradesFromOrder(orderNumber int64) (TradesFromOrder, error) {
 
 	postParameters := url.Values{}
 	postParameters.Add("command", "returnOrderTrades")

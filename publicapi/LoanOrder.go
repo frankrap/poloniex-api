@@ -57,7 +57,7 @@ type LoanOrder struct {
 //      }, ...
 //    ]
 //  }
-func (client *PublicClient) GetLoanOrders(currency string) (*LoanOrders, error) {
+func (client *Client) GetLoanOrders(currency string) (*LoanOrders, error) {
 
 	params := map[string]string{
 		"command":  "returnLoanOrders",

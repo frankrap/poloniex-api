@@ -50,7 +50,7 @@ type Trade struct {
 //      "total": "0.00011379"
 //    }, ...
 //  ]
-func (client *PublicClient) GetTradeHistory(currencyPair string, start, end time.Time) (TradeHistory, error) {
+func (client *Client) GetTradeHistory(currencyPair string, start, end time.Time) (TradeHistory, error) {
 
 	params := map[string]string{
 		"command":      "returnTradeHistory",
@@ -99,7 +99,7 @@ func (client *PublicClient) GetTradeHistory(currencyPair string, start, end time
 //      "total": "0.00044861"
 //    }, ...
 //  ]
-func (client *PublicClient) GetPast200TradeHistory(currencyPair string) (TradeHistory, error) {
+func (client *Client) GetPast200TradeHistory(currencyPair string) (TradeHistory, error) {
 
 	params := map[string]string{
 		"command":      "returnTradeHistory",

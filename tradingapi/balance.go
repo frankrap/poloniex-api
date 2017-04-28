@@ -20,7 +20,7 @@ type Balances map[string]float64
 //    "BTC": "0.59098578",
 //    "LTC": "3.31117268", ...
 //  }
-func (client *TradingClient) GetBalances() (Balances, error) {
+func (client *Client) GetBalances() (Balances, error) {
 
 	postParameters := url.Values{}
 	postParameters.Add("command", "returnBalances")

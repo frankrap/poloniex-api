@@ -53,7 +53,7 @@ type AllOpenOrders map[string]*OpenOrders
 //      "margin": 0
 //    }, ...
 //  ]
-func (client *TradingClient) GetOpenOrders(currencyPair string) (*OpenOrders, error) {
+func (client *Client) GetOpenOrders(currencyPair string) (*OpenOrders, error) {
 
 	postParameters := url.Values{}
 	postParameters.Add("command", "returnOpenOrders")
@@ -102,7 +102,7 @@ func (client *TradingClient) GetOpenOrders(currencyPair string) (*OpenOrders, er
 //      }, ...
 //    ], ...
 //  }
-func (client *TradingClient) GetAllOpenOrders() (AllOpenOrders, error) {
+func (client *Client) GetAllOpenOrders() (AllOpenOrders, error) {
 
 	postParameters := url.Values{}
 	postParameters.Add("command", "returnOpenOrders")

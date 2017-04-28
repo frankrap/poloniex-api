@@ -43,7 +43,7 @@ type Tick struct {
 //      "low24hr": "0.00023653"
 //    }, ...
 //  }
-func (client *PublicClient) GetTickers() (Ticks, error) {
+func (client *Client) GetTickers() (Ticks, error) {
 
 	params := map[string]string{
 		"command": "returnTicker",

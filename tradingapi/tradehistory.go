@@ -61,7 +61,7 @@ type AllTradeHistory map[string]TradeHistory
 //      "category": "exchange"
 //    }, ...
 //  ]
-func (client *TradingClient) GetTradeHistory(currencyPair string, start, end time.Time) (TradeHistory, error) {
+func (client *Client) GetTradeHistory(currencyPair string, start, end time.Time) (TradeHistory, error) {
 
 	postParameters := url.Values{}
 	postParameters.Add("command", "returnTradeHistory")
@@ -114,7 +114,7 @@ func (client *TradingClient) GetTradeHistory(currencyPair string, start, end tim
 //      }, ...
 //    ], ...
 //  }
-func (client *TradingClient) GetAllTradeHistory(start, end time.Time) (AllTradeHistory, error) {
+func (client *Client) GetAllTradeHistory(start, end time.Time) (AllTradeHistory, error) {
 
 	postParameters := url.Values{}
 	postParameters.Add("command", "returnTradeHistory")

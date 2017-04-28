@@ -53,7 +53,7 @@ const (
 	MAX_REQUEST_PER_SECOND     = 5
 )
 
-type TradingClient struct {
+type Client struct {
 	apiKey     string
 	apiSecret  string
 	httpClient *http.Client
@@ -65,10 +65,10 @@ type APIError struct {
 }
 
 type configuration struct {
-	TradingAPIConf `json:"poloniex_trading_api"`
+	apiConf `json:"poloniex_trading_api"`
 }
 
-type TradingAPIConf struct {
+type apiConf struct {
 	APIUrl               string `json:"api_url"`
 	HTTPClientTimeoutSec int    `json:"httpclient_timeout_sec"`
 	MaxRequestsSec       int    `json:"max_requests_sec"`
@@ -114,8 +114,8 @@ func init() {
 	}
 }
 
-// NewTradingClient returns a newly configured client
-func NewTradingClient() (*TradingClient, error) {
+// NewClient returns a newly configured client
+func NewClient() (*Client, error) {
 
 	reqInterval := 1000 * time.Millisecond / time.Duration(conf.MaxRequestsSec)
 
@@ -129,7 +129,7 @@ func NewTradingClient() (*TradingClient, error) {
 		return nil, err
 	}
 
-	tc := TradingClient{
+	tc := Client{
 		conf.ApiKey,
 		conf.ApiSecret,
 		&client,
@@ -140,7 +140,7 @@ func NewTradingClient() (*TradingClient, error) {
 }
 
 // Do prepares and executes api call requests.
-func (c *TradingClient) do(form url.Values) ([]byte, error) {
+func (c *Client) do(form url.Values) ([]byte, error) {
 
 	nonce := time.Now().UnixNano()
 	form.Add("nonce", strconv.Itoa(int(nonce)))

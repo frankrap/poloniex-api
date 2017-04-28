@@ -17,7 +17,7 @@ import (
 //    "success": 1,
 //    "response": "CKXbbs8FAVbtEa397gJHSutmrdrBrhUMxe"
 //  }
-func (client *TradingClient) GenerateNewAddress(currency string) (string, error) {
+func (client *Client) GenerateNewAddress(currency string) (string, error) {
 
 	postParameters := url.Values{}
 	postParameters.Add("command", "generateNewAddress")

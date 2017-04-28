@@ -45,7 +45,7 @@ type CandleStick struct {
 //      "weightedAverage": 0.00430015
 //    }, ...
 //  ]
-func (client *PublicClient) GetChartData(currencyPair string, start, end time.Time, period int) (ChartData, error) {
+func (client *Client) GetChartData(currencyPair string, start, end time.Time, period int) (ChartData, error) {
 
 	switch period { // Valid period only
 	case 300: // 5min

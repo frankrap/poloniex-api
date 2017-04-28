@@ -111,7 +111,7 @@ var (
 //
 // Several order book and trade history updates will often arrive in a single message.
 // Be sure to loop through the entire array, otherwise you will miss some updates.
-func (client *PushClient) SubscribeMarket(currencyPair string) (MarketUpdater, error) {
+func (client *Client) SubscribeMarket(currencyPair string) (MarketUpdater, error) {
 
 	handler := func(args []interface{}, kwargs map[string]interface{}) {
 
@@ -189,7 +189,7 @@ func (client *PushClient) SubscribeMarket(currencyPair string) (MarketUpdater, e
 	return updaterInfo.updater, nil
 }
 
-func (client *PushClient) UnsubscribeMarket(currencyPair string) error {
+func (client *Client) UnsubscribeMarket(currencyPair string) error {
 
 	client.wampClientMu.RLock()
 	defer client.wampClientMu.RUnlock()

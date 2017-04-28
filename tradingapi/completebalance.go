@@ -31,7 +31,7 @@ type CompleteBalance struct {
 //      "btcValue": "0.078"
 //    }, ...
 //  }
-func (client *TradingClient) GetCompleteBalances() (CompleteBalances, error) {
+func (client *Client) GetCompleteBalances() (CompleteBalances, error) {
 
 	postParameters := url.Values{}
 	postParameters.Add("command", "returnCompleteBalances")

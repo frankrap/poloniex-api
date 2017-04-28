@@ -56,7 +56,7 @@ type Order struct {
 //    "isFrozen": "0",
 //    "seq": 28233022
 //  }
-func (client *PublicClient) GetOrderBook(currencyPair string, depth int) (*OrderBook, error) {
+func (client *Client) GetOrderBook(currencyPair string, depth int) (*OrderBook, error) {
 
 	params := map[string]string{
 		"command":      "returnOrderBook",
@@ -110,7 +110,7 @@ func (client *PublicClient) GetOrderBook(currencyPair string, depth int) (*Order
 //      "seq": 30446838
 //    }, ...
 //  }
-func (client *PublicClient) GetOrderBooks(depth int) (OrderBooks, error) {
+func (client *Client) GetOrderBooks(depth int) (OrderBooks, error) {
 
 	params := map[string]string{
 		"command":      "returnOrderBook",

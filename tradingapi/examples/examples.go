@@ -8,12 +8,12 @@ import (
 	"trading/api/poloniex/tradingapi"
 )
 
-var client *tradingapi.TradingClient
+var client *tradingapi.Client
 
 func main() {
 
 	var err error
-	client, err = tradingapi.NewTradingClient()
+	client, err = tradingapi.NewClient()
 
 	if err != nil {
 		log.Fatal(err)

@@ -18,7 +18,7 @@ type DepositAddresses map[string]string
 // {
 //     "BTC": "19YqztHmspv2egyD6jQM3yn81x5t5krVdJ", ...
 // }
-func (client *TradingClient) GetDepositAddresses() (DepositAddresses, error) {
+func (client *Client) GetDepositAddresses() (DepositAddresses, error) {
 
 	postParameters := url.Values{}
 	postParameters.Add("command", "returnDepositAddresses")

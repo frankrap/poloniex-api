@@ -27,7 +27,7 @@ type FeeInfo struct {
 //    "thirtyDayVolume": "612.00248891",
 //    "nextTier": "1200.00000000"
 //  }
-func (client *TradingClient) GetFeeInfo() (*FeeInfo, error) {
+func (client *Client) GetFeeInfo() (*FeeInfo, error) {
 
 	postParameters := url.Values{}
 	postParameters.Add("command", "returnFeeInfo")

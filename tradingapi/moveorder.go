@@ -41,19 +41,19 @@ type MovedOrder struct {
 	ResultingTrades map[string][]*poloniex.ResultingTrade `json:"resultingTrades"`
 }
 
-func (client *TradingClient) MoveOrderPostOnly(orderNumber int64, rate, amount float64) (*MovedOrder, error) {
+func (client *Client) MoveOrderPostOnly(orderNumber int64, rate, amount float64) (*MovedOrder, error) {
 	return client.moveOrder(orderNumber, rate, amount, "postOnly")
 }
 
-func (client *TradingClient) MoveOrderImmediateOrCancel(orderNumber int64, rate, amount float64) (*MovedOrder, error) {
+func (client *Client) MoveOrderImmediateOrCancel(orderNumber int64, rate, amount float64) (*MovedOrder, error) {
 	return client.moveOrder(orderNumber, rate, amount, "immediateOrCancel")
 }
 
-func (client *TradingClient) MoveOrder(orderNumber int64, rate, amount float64) (*MovedOrder, error) {
+func (client *Client) MoveOrder(orderNumber int64, rate, amount float64) (*MovedOrder, error) {
 	return client.moveOrder(orderNumber, rate, amount, "")
 }
 
-func (client *TradingClient) moveOrder(orderNumber int64, rate, amount float64, option string) (*MovedOrder, error) {
+func (client *Client) moveOrder(orderNumber int64, rate, amount float64, option string) (*MovedOrder, error) {
 
 	postParameters := url.Values{}
 	postParameters.Add("command", "moveOrder")

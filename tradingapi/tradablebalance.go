@@ -29,7 +29,7 @@ type TradableBalance map[string]float64
 //      "LTC": "1214.67825290"
 //    }, ...
 //  }
-func (client *TradingClient) GetTradableBalances() (TradableBalances, error) {
+func (client *Client) GetTradableBalances() (TradableBalances, error) {
 
 	postParameters := url.Values{}
 	postParameters.Add("command", "returnTradableBalances")

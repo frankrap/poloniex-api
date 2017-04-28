@@ -43,39 +43,39 @@ type BuyOrSellOrder struct {
 	AmountUnfilled  float64                   `json:"amountUnfilled,string"` // Only for ImmediateOrCancel option
 }
 
-func (client *TradingClient) BuyFillOrKill(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
+func (client *Client) BuyFillOrKill(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
 	return client.buyOrSell("buy", currencyPair, rate, amount, "fillOrKill")
 }
 
-func (client *TradingClient) BuyImmediateOrCancel(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
+func (client *Client) BuyImmediateOrCancel(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
 	return client.buyOrSell("buy", currencyPair, rate, amount, "immediateOrCancel")
 }
 
-func (client *TradingClient) BuyPostOnly(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
+func (client *Client) BuyPostOnly(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
 	return client.buyOrSell("buy", currencyPair, rate, amount, "postOnly")
 }
 
-func (client *TradingClient) Buy(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
+func (client *Client) Buy(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
 	return client.buyOrSell("buy", currencyPair, rate, amount, "")
 }
 
-func (client *TradingClient) SellFillOrKill(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
+func (client *Client) SellFillOrKill(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
 	return client.buyOrSell("sell", currencyPair, rate, amount, "fillOrKill")
 }
 
-func (client *TradingClient) SellImmediateOrCancel(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
+func (client *Client) SellImmediateOrCancel(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
 	return client.buyOrSell("sell", currencyPair, rate, amount, "immediateOrCancel")
 }
 
-func (client *TradingClient) SellPostOnly(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
+func (client *Client) SellPostOnly(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
 	return client.buyOrSell("sell", currencyPair, rate, amount, "postOnly")
 }
 
-func (client *TradingClient) Sell(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
+func (client *Client) Sell(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
 	return client.buyOrSell("sell", currencyPair, rate, amount, "")
 }
 
-func (client *TradingClient) buyOrSell(command, currencyPair string, rate, amount float64, option string) (*BuyOrSellOrder, error) {
+func (client *Client) buyOrSell(command, currencyPair string, rate, amount float64, option string) (*BuyOrSellOrder, error) {
 
 	postParameters := url.Values{}
 	postParameters.Add("command", command)

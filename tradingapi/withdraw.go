@@ -24,7 +24,7 @@ type Withdrawal struct {
 //  {
 //    "response": "Withdrew 2398 NXT."
 //  }
-func (client *TradingClient) Withdraw(currency string, amount float64, address string) (*Withdrawal, error) {
+func (client *Client) Withdraw(currency string, amount float64, address string) (*Withdrawal, error) {
 
 	postParameters := url.Values{}
 	postParameters.Add("command", "withdraw")
@@ -48,7 +48,7 @@ func (client *TradingClient) Withdraw(currency string, amount float64, address s
 }
 
 // WithdrawWithPaymentId withdraw for currency with special id parameter (XMR, XRP ...)
-func (client *TradingClient) WithdrawWithPaymentId(currency string, amount float64, address, paymentId string) (*Withdrawal, error) {
+func (client *Client) WithdrawWithPaymentId(currency string, amount float64, address, paymentId string) (*Withdrawal, error) {
 
 	postParameters := url.Values{}
 	postParameters.Add("command", "withdraw")

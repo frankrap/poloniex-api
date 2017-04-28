@@ -7,12 +7,12 @@ import (
 	"trading/api/poloniex/publicapi"
 )
 
-var client *publicapi.PublicClient
+var client *publicapi.Client
 
 // go run example.go
 func main() {
 
-	client = publicapi.NewPublicClient()
+	client = publicapi.NewClient()
 
 	printPublicTickers()
 

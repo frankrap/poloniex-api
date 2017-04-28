@@ -25,7 +25,7 @@ type CanceledOrder struct {
 //    "amount": "0.1"
 //    "message": "Order #258128814946 canceled."
 //  }
-func (client *TradingClient) CancelOrder(orderNumber int64) (*CanceledOrder, error) {
+func (client *Client) CancelOrder(orderNumber int64) (*CanceledOrder, error) {
 
 	postParameters := url.Values{}
 	postParameters.Add("command", "cancelOrder")

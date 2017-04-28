@@ -46,7 +46,7 @@ var (
 //
 // ['BTC_BBR','0.00069501','0.00074346','0.00069501', '-0.00742634',
 //  '8.63286802','11983.47150109',0,'0.00107920','0.00045422']
-func (client *PushClient) SubscribeTicker() (Ticker, error) {
+func (client *Client) SubscribeTicker() (Ticker, error) {
 
 	handler := func(args []interface{}, kwargs map[string]interface{}) {
 
@@ -96,7 +96,7 @@ func (client *PushClient) SubscribeTicker() (Ticker, error) {
 	return ticker, nil
 }
 
-func (client *PushClient) UnsubscribeTicker() error {
+func (client *Client) UnsubscribeTicker() error {
 
 	client.wampClientMu.RLock()
 	defer client.wampClientMu.RUnlock()

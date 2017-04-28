@@ -8,12 +8,12 @@ import (
 	"trading/api/poloniex/pushapi"
 )
 
-var client *pushapi.PushClient
+var client *pushapi.Client
 
 func main() {
 
 	var err error
-	client, err = pushapi.NewPushClient()
+	client, err = pushapi.NewClient()
 
 	if err != nil {
 		log.Fatal(err)

@@ -25,7 +25,7 @@ var (
 	logger *logrus.Entry
 )
 
-type PushClient struct {
+type Client struct {
 	wampClientMu sync.RWMutex
 	wampClient   *turnpike.Client
 	subscription map[string]func() error
@@ -40,10 +40,10 @@ type msgCount struct {
 }
 
 type configuration struct {
-	PushAPIConf `json:"poloniex_push_api"`
+	apiConf `json:"poloniex_push_api"`
 }
 
-type PushAPIConf struct {
+type apiConf struct {
 	WssUri     string `json:"wss_uri"`
 	Realm      string `json:"realm"`
 	LogLevel   string `json:"log_level"`
@@ -87,7 +87,7 @@ func init() {
 	}
 }
 
-func NewPushClient() (*PushClient, error) {
+func NewClient() (*Client, error) {
 
 	client, err := turnpike.NewWebsocketClient(turnpike.JSON,
 		conf.WssUri, nil, nil)
@@ -101,7 +101,7 @@ func NewPushClient() (*PushClient, error) {
 		return nil, fmt.Errorf("turnpike.Client.JoinRealm: %v", err)
 	}
 
-	res := &PushClient{
+	res := &Client{
 		sync.RWMutex{},
 		client,
 		make(map[string]func() error), &msgCount{},
@@ -112,7 +112,7 @@ func NewPushClient() (*PushClient, error) {
 	return res, nil
 }
 
-func (client *PushClient) autoReconnect(timeout time.Duration) {
+func (client *Client) autoReconnect(timeout time.Duration) {
 
 	for {
 
@@ -173,7 +173,7 @@ func (client *PushClient) autoReconnect(timeout time.Duration) {
 	}
 }
 
-func (client *PushClient) addSubscription(topic string, subscribe func() error) {
+func (client *Client) addSubscription(topic string, subscribe func() error) {
 
 	client.wampClientMu.Lock()
 	defer client.wampClientMu.Unlock()
@@ -181,7 +181,7 @@ func (client *PushClient) addSubscription(topic string, subscribe func() error) 
 	client.subscription[topic] = subscribe
 }
 
-func (client *PushClient) removeSubscription(topic string) {
+func (client *Client) removeSubscription(topic string) {
 
 	client.wampClientMu.Lock()
 	defer client.wampClientMu.Unlock()
@@ -189,7 +189,7 @@ func (client *PushClient) removeSubscription(topic string) {
 	delete(client.subscription, topic)
 }
 
-func (client *PushClient) updateMsgCount() {
+func (client *Client) updateMsgCount() {
 
 	client.mc.Lock()
 	defer client.mc.Unlock()
@@ -198,7 +198,7 @@ func (client *PushClient) updateMsgCount() {
 	client.mc.lastTimestamp = time.Now()
 }
 
-func (client *PushClient) Close() error {
+func (client *Client) Close() error {
 
 	client.wampClientMu.RLock()
 	defer client.wampClientMu.RUnlock()

@@ -66,7 +66,7 @@ type WithdrawalHistory struct {
 //      }, ...
 //    ]
 //  }
-func (client *TradingClient) GetDepositsWithdrawals(start, end time.Time) (*DepositsWithdrawals, error) {
+func (client *Client) GetDepositsWithdrawals(start, end time.Time) (*DepositsWithdrawals, error) {
 
 	postParameters := url.Values{}
 	postParameters.Add("command", "returnDepositsWithdrawals")
