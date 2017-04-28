@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
 var (
@@ -43,11 +44,13 @@ type apiConf struct {
 
 func init() {
 
-	customFormatter := new(logrus.TextFormatter)
+	customFormatter := new(prefixed.TextFormatter)
 	customFormatter.FullTimestamp = true
+	customFormatter.ForceColors = true
+	customFormatter.ForceFormatting = true
 	logrus.SetFormatter(customFormatter)
 
-	logger = logrus.WithField("context", "[api:poloniex:publicapi]")
+	logger = logrus.WithField("prefix", "[api:poloniex:publicapi]")
 
 	content, err := ioutil.ReadFile("conf.json")
 

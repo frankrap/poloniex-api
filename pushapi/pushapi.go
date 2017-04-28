@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/Sirupsen/logrus"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 	turnpike "gopkg.in/jcelliott/turnpike.v2"
 )
 
@@ -52,11 +53,13 @@ type apiConf struct {
 
 func init() {
 
-	customFormatter := new(logrus.TextFormatter)
+	customFormatter := new(prefixed.TextFormatter)
 	customFormatter.FullTimestamp = true
+	customFormatter.ForceColors = true
+	customFormatter.ForceFormatting = true
 	logrus.SetFormatter(customFormatter)
 
-	logger = logrus.WithField("context", "[api:poloniex:pushapi]")
+	logger = logrus.WithField("prefix", "[api:poloniex:pushapi]")
 
 	content, err := ioutil.ReadFile("conf.json")
 
