@@ -160,10 +160,6 @@ func (client *Client) SubscribeMarket(currencyPair string) (MarketUpdater, error
 		return nil
 	}
 
-	if err := subscribe(); err != nil {
-		return nil, err
-	}
-
 	mutex.Lock()
 	updaterInfo, ok := marketUpdaterInfos[currencyPair]
 	if !ok {
@@ -175,6 +171,13 @@ func (client *Client) SubscribeMarket(currencyPair string) (MarketUpdater, error
 		marketUpdaterInfos[currencyPair] = updaterInfo
 	}
 	mutex.Unlock()
+
+	if err := subscribe(); err != nil {
+		mutex.Lock()
+		delete(marketUpdaterInfos, currencyPair)
+		mutex.Unlock()
+		return nil, err
+	}
 
 	updaterInfo.mu.Lock()
 	select {
