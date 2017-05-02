@@ -11,8 +11,8 @@ import (
 type TradeHistory []*Trade
 
 type Trade struct {
-	GlobalTradeId int     `json:"globalTradeID"`
-	TradeId       int     `json:"tradeID"`
+	GlobalTradeId int64   `json:"globalTradeID"`
+	TradeId       int64   `json:"tradeID"`
 	Date          int64   // Unix timestamp
 	TypeOrder     string  `json:"type"`
 	Rate          float64 `json:"rate,string"`
