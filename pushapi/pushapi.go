@@ -29,15 +29,15 @@ var (
 type Client struct {
 	wampClientMu sync.RWMutex
 	wampClient   *turnpike.Client
-	subscription map[string]func() error
 
-	mc *msgCount
+	plu *pushLastUpdate
 }
 
-type msgCount struct {
-	sync.Mutex
-	count         uint64
-	lastTimestamp time.Time
+type pushLastUpdate struct {
+	sync.RWMutex
+	lastTimestamp      time.Time
+	topicLastTimestamp map[string]time.Time
+	subscription       map[string]func() error
 }
 
 type configuration struct {
@@ -45,10 +45,11 @@ type configuration struct {
 }
 
 type apiConf struct {
-	WssUri     string `json:"wss_uri"`
-	Realm      string `json:"realm"`
-	LogLevel   string `json:"log_level"`
-	TimeoutSec int    `json:"timeout_sec"`
+	WssUri          string `json:"wss_uri"`
+	Realm           string `json:"realm"`
+	LogLevel        string `json:"log_level"`
+	TimeoutSec      int    `json:"timeout_sec"`
+	TopicTimeoutMin int    `json:"topic_timeout_min"`
 }
 
 func init() {
@@ -104,10 +105,16 @@ func NewClient() (*Client, error) {
 		return nil, fmt.Errorf("turnpike.Client.JoinRealm: %v", err)
 	}
 
+	plu := &pushLastUpdate{
+		lastTimestamp:      time.Now(),
+		topicLastTimestamp: make(map[string]time.Time),
+		subscription:       make(map[string]func() error),
+	}
+
 	res := &Client{
 		sync.RWMutex{},
 		client,
-		make(map[string]func() error), &msgCount{},
+		plu,
 	}
 
 	go res.autoReconnect(time.Duration(conf.TimeoutSec) * time.Second)
@@ -118,87 +125,113 @@ func NewClient() (*Client, error) {
 func (client *Client) autoReconnect(timeout time.Duration) {
 
 	for {
-
 		time.Sleep(timeout)
 
-		client.mc.Lock()
-		count := client.mc.count
-		lastTimestamp := client.mc.lastTimestamp
-		client.mc.Unlock()
+		client.plu.RLock()
+		lastTimestamp := client.plu.lastTimestamp
+		client.plu.RUnlock()
 
-		if count > 0 && time.Since(lastTimestamp) > timeout {
+		if time.Since(lastTimestamp) > timeout {
 
 			logger.Warn("Auto reconnecting...")
 			var err error
 
 			if err = client.Close(); err != nil {
-				logger.WithField("error", err).Error("PushClient.autoReconnect: PushClient.Close")
+				logger.WithField("error", err).Error(
+					"PushClient.autoReconnect: PushClient.Close")
 			}
 
 			client.wampClientMu.Lock()
-
 			for {
 
 				time.Sleep(5 * time.Second)
-				client.wampClient, err = turnpike.NewWebsocketClient(turnpike.JSON, conf.WssUri, nil, nil)
+				client.wampClient, err =
+					turnpike.NewWebsocketClient(turnpike.JSON, conf.WssUri, nil, nil)
 
 				if err != nil {
-					logger.WithField("error", err).Error("PushClient.autoReconnect: turnpike.NewWebsocketClient")
+					logger.WithField("error", err).Error(
+						"PushClient.autoReconnect: turnpike.NewWebsocketClient")
 					continue
 				}
 
 				_, err = client.wampClient.JoinRealm(conf.Realm, nil)
 				if err != nil {
-					logger.WithField("error", err).Error("PushClient.autoReconnect: turnpike.Client.JoinRealm")
+					logger.WithField("error", err).Error(
+						"PushClient.autoReconnect: turnpike.Client.JoinRealm")
 					continue
 				}
-
-				client.mc.Lock()
-				client.mc.count = 0
-				client.mc.Unlock()
 				break
-			}
-
-			subscribes := make(map[string]func() error)
-			for topic, subscribe := range client.subscription {
-				subscribes[topic] = subscribe
 			}
 			client.wampClientMu.Unlock()
 
-			logger.WithField("subscriptions", subscribes).Infof("Resubscribing %d topics", len(subscribes))
+			client.plu.Lock()
+			client.plu.lastTimestamp = time.Now()
 
-			for _, subscribe := range subscribes {
+			logger.Infof("Resubscribing %d topics", len(client.plu.subscription))
+
+			for _, subscribe := range client.plu.subscription {
 				if err = subscribe(); err != nil {
-					logger.WithField("error", err).Error("PushClient.autoReconnect: subscribe")
+					logger.WithField("error", err).Error(
+						"PushClient.autoReconnect: subscribe")
 				}
 			}
+			client.plu.Unlock()
+
+			continue
 		}
+
+		client.plu.Lock()
+
+		topicTimeout := time.Duration(conf.TopicTimeoutMin) * time.Minute
+		topicsError := make(map[string]time.Time)
+
+		for topic, timestamp := range client.plu.topicLastTimestamp {
+
+			if time.Since(timestamp) > topicTimeout {
+				topicsError[topic] = timestamp
+			}
+		}
+
+		for topic, timestamp := range topicsError {
+
+			logger.Infof("%s: no update since %s, resubscribing...",
+				topic, time.Since(timestamp))
+
+			if err := client.plu.subscription[topic](); err != nil {
+				logger.WithField("error", err).Error(
+					"PushClient.autoReconnect: subscribe")
+			}
+		}
+		client.plu.Unlock()
 	}
 }
 
 func (client *Client) addSubscription(topic string, subscribe func() error) {
 
-	client.wampClientMu.Lock()
-	defer client.wampClientMu.Unlock()
+	client.plu.Lock()
+	defer client.plu.Unlock()
 
-	client.subscription[topic] = subscribe
+	client.plu.subscription[topic] = subscribe
+	client.plu.topicLastTimestamp[topic] = time.Now()
 }
 
 func (client *Client) removeSubscription(topic string) {
 
-	client.wampClientMu.Lock()
-	defer client.wampClientMu.Unlock()
+	client.plu.Lock()
+	defer client.plu.Unlock()
 
-	delete(client.subscription, topic)
+	delete(client.plu.subscription, topic)
+	delete(client.plu.topicLastTimestamp, topic)
 }
 
-func (client *Client) updateMsgCount() {
+func (client *Client) updateTopicTimestamp(topic string) {
 
-	client.mc.Lock()
-	defer client.mc.Unlock()
+	client.plu.Lock()
+	defer client.plu.Unlock()
 
-	client.mc.count++
-	client.mc.lastTimestamp = time.Now()
+	timestamp := time.Now()
+	client.plu.lastTimestamp = timestamp
+	client.plu.topicLastTimestamp[topic] = timestamp
 }
 
 func (client *Client) Close() error {

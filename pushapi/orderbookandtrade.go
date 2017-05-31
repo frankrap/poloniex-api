@@ -115,11 +115,12 @@ func (client *Client) SubscribeMarket(currencyPair string) (MarketUpdater, error
 
 	handler := func(args []interface{}, kwargs map[string]interface{}) {
 
-		client.updateMsgCount()
+		client.updateTopicTimestamp(currencyPair)
 
 		seq, ok := kwargs["seq"].(float64)
 		if !ok {
-			fmt.Printf("'seq' type assertion failed")
+			logger.WithField("error", "'seq' type assertion failed").Error(
+				"convertArgsToMarketUpdateSlice")
 			return
 		}
 
@@ -195,17 +196,20 @@ func (client *Client) SubscribeMarket(currencyPair string) (MarketUpdater, error
 func (client *Client) UnsubscribeMarket(currencyPair string) error {
 
 	client.wampClientMu.RLock()
-	defer client.wampClientMu.RUnlock()
 
 	if err := client.wampClient.Unsubscribe(currencyPair); err != nil {
 		return fmt.Errorf("turnpike.Client.Unsuscribe: %v", err)
 	}
+
+	client.wampClientMu.RUnlock()
 
 	client.removeSubscription(currencyPair)
 
 	mutex.RLock()
 	updaterInfo := marketUpdaterInfos[currencyPair]
 	mutex.RUnlock()
+
+	updaterInfo.updater <- nil
 
 	updaterInfo.mu.RLock()
 	close(updaterInfo.unsubscribed)

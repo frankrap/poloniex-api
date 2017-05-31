@@ -42,7 +42,7 @@ func (client *Client) SubscribeTrollbox() (Trollbox, error) {
 
 	handler := func(args []interface{}, kwargs map[string]interface{}) {
 
-		client.updateMsgCount()
+		client.updateTopicTimestamp(TROLLBOX)
 
 		tbMsg, err := convertArgsToTrollboxMessage(args)
 		if err != nil {
@@ -91,13 +91,16 @@ func (client *Client) SubscribeTrollbox() (Trollbox, error) {
 func (client *Client) UnsubscribeTrollbox() error {
 
 	client.wampClientMu.RLock()
-	defer client.wampClientMu.RUnlock()
 
 	if err := client.wampClient.Unsubscribe(TROLLBOX); err != nil {
 		return fmt.Errorf("turnpike.Client.Unsuscribe: %v", err)
 	}
 
+	client.wampClientMu.RUnlock()
+
 	client.removeSubscription(TROLLBOX)
+
+	trollbox <- nil
 
 	trollboxMu.RLock()
 	close(trollboxUnsubscribed)

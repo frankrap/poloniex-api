@@ -50,7 +50,7 @@ func (client *Client) SubscribeTicker() (Ticker, error) {
 
 	handler := func(args []interface{}, kwargs map[string]interface{}) {
 
-		client.updateMsgCount()
+		client.updateTopicTimestamp(TICKER)
 
 		tick, err := convertArgsToTick(args)
 		if err != nil {
@@ -99,13 +99,16 @@ func (client *Client) SubscribeTicker() (Ticker, error) {
 func (client *Client) UnsubscribeTicker() error {
 
 	client.wampClientMu.RLock()
-	defer client.wampClientMu.RUnlock()
 
 	if err := client.wampClient.Unsubscribe(TICKER); err != nil {
 		return fmt.Errorf("turnpike.Client.Unsuscribe: %v", err)
 	}
 
+	client.wampClientMu.RUnlock()
+
 	client.removeSubscription(TICKER)
+
+	ticker <- nil
 
 	tickerMu.RLock()
 	close(tickerUnsubscribed)
