@@ -3,8 +3,8 @@
         "api_url": "https://poloniex.com/tradingApi",
         "httpclient_timeout_sec": 10,
         "max_requests_sec": 5,
-        "api_key": "ZQ4TE8GA-AADYMSOO-HNXAWUL8-JWDMCRB1",
-        "api_secret": "f146927ae27958795bb65a5c4fa536f85ac35fae54c98cec47c9c99a3d0e2d4a2849c7c6bc0633b85f1a61018613c339a9c357195f23faa1ab7d14cdb81532fd",
+        "api_key": "",
+        "api_secret": "",
         "log_level": "debug"
     }
 }
