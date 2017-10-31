@@ -6,6 +6,8 @@ cd publicapi/examples
 <br>
 go run examples.go
 
+Docs: https://poloniex.com/support/api
+
 TODO:
   
   * Unit tests
