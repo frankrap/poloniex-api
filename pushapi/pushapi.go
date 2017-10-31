@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 	turnpike "gopkg.in/jcelliott/turnpike.v2"
 )
@@ -94,7 +94,7 @@ func init() {
 func NewClient() (*Client, error) {
 
 	client, err := turnpike.NewWebsocketClient(turnpike.JSON,
-		conf.WssUri, nil, nil)
+		conf.WssUri, nil, nil, nil)
 
 	if err != nil {
 		return nil, fmt.Errorf("turnpike.NewWebsocketClient: %v", err)
@@ -146,7 +146,7 @@ func (client *Client) autoReconnect(timeout time.Duration) {
 
 				time.Sleep(5 * time.Second)
 				client.wampClient, err =
-					turnpike.NewWebsocketClient(turnpike.JSON, conf.WssUri, nil, nil)
+					turnpike.NewWebsocketClient(turnpike.JSON, conf.WssUri, nil, nil, nil)
 
 				if err != nil {
 					logger.WithField("error", err).Error(

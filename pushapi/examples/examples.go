@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"log"
 	"time"
-	"trading/api/poloniex"
-	"trading/api/poloniex/pushapi"
+
+	poloniex "github.com/joemocquant/poloniex-api"
+	pushapi "github.com/joemocquant/poloniex-api/pushapi"
 )
 
 var client *pushapi.Client

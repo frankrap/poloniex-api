@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"log"
 	"time"
-	"trading/api/poloniex"
-	"trading/api/poloniex/tradingapi"
+
+	poloniex "github.com/joemocquant/poloniex-api"
+	tradingapi "github.com/joemocquant/poloniex-api/tradingapi"
 )
 
 var client *tradingapi.Client
@@ -19,7 +20,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// printBalances()
+	printBalances()
 	// printCompleteBalances()
 	// printDepositAddresses()
 	// GenerateNewAddress()

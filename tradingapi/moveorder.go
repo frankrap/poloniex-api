@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
-	"trading/api/poloniex"
+
+	poloniex "github.com/joemocquant/poloniex-api"
 )
 
 // Poloniex trading API implementation of moveOrder command.

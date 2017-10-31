@@ -3,8 +3,9 @@ package main
 import (
 	"log"
 	"time"
-	"trading/api/poloniex"
-	"trading/api/poloniex/publicapi"
+
+	poloniex "github.com/joemocquant/poloniex-api"
+	publicapi "github.com/joemocquant/poloniex-api/publicapi"
 )
 
 var client *publicapi.Client
