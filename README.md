@@ -6,7 +6,7 @@ cd publicapi/examples
 <br>
 go run examples.go
 
-TODO 
+TODO:
   
   * Unit tests
      
