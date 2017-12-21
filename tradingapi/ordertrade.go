@@ -68,6 +68,8 @@ func (client *Client) GetTradesFromOrder(orderNumber int64) (TradesFromOrder, er
 
 	res := make(TradesFromOrder, 0)
 
+	fmt.Println(string(resp))
+
 	if err := json.Unmarshal(resp, &res); err != nil {
 		return nil, fmt.Errorf("json.Unmarshal: %v", err)
 	}

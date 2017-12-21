@@ -66,6 +66,11 @@ func (client *Client) GetOpenOrders(currencyPair string) (*OpenOrders, error) {
 
 	res := OpenOrders{}
 
+	if string(resp) == "" {
+		return &res, nil
+	}
+	fmt.Println(string(resp))
+
 	if err := json.Unmarshal(resp, &res); err != nil {
 		return nil, fmt.Errorf("json.Unmarshal: %v", err)
 	}

@@ -72,6 +72,19 @@ func (client *Client) GetAccountBalances(account string) (AccountBalances, error
 
 	res := AvailableAccountBalances{}
 
+	//fmt.Println(string(resp))
+
+	s := string(resp)
+	if s == "" {
+		return AccountBalances{}, nil
+	}
+
+	if s == `{"exchange":[]}` ||
+		s == `{"margin":[]}` ||
+		s == `{"lending":[]}` {
+		return AccountBalances{}, nil
+	}
+
 	if err := json.Unmarshal(resp, &res); err != nil {
 		return nil, fmt.Errorf("json.Unmarshal: %v", err)
 	}

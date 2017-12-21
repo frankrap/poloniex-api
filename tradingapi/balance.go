@@ -30,6 +30,10 @@ func (client *Client) GetBalances() (Balances, error) {
 		return nil, fmt.Errorf("TradingClient.do: %v", err)
 	}
 
+	if string(resp) == "" {
+		return Balances{}, nil
+	}
+
 	res := make(Balances)
 
 	if err := json.Unmarshal(resp, &res); err != nil {

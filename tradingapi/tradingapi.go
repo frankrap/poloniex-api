@@ -44,8 +44,10 @@ import (
 )
 
 var (
-	conf   *configuration
 	logger *logrus.Entry
+	apiUrl = "https://poloniex.com/tradingApi"
+	maxRequestsSec = 5
+	httpClientTimeoutSec = 10
 )
 
 type Client struct {
@@ -83,52 +85,27 @@ func init() {
 
 	logger = logrus.WithField("prefix", "[api:poloniex:tradingapi]")
 
-	content, err := ioutil.ReadFile("conf.json")
-
-	if err != nil {
-		logger.WithField("error", err).Fatal("loading configuration")
-	}
-
-	if err := json.Unmarshal(content, &conf); err != nil {
-		logger.WithField("error", err).Fatal("loading configuration")
-	}
-
-	switch conf.LogLevel {
-	case "debug":
-		logrus.SetLevel(logrus.DebugLevel)
-	case "info":
-		logrus.SetLevel(logrus.InfoLevel)
-	case "warn":
-		logrus.SetLevel(logrus.WarnLevel)
-	case "error":
-		logrus.SetLevel(logrus.ErrorLevel)
-	case "fatal":
-		logrus.SetLevel(logrus.FatalLevel)
-	case "panic":
-		logrus.SetLevel(logrus.PanicLevel)
-	default:
-		logrus.SetLevel(logrus.WarnLevel)
-	}
+	logrus.SetLevel(logrus.InfoLevel)
 }
 
 // NewClient returns a newly configured client
-func NewClient() (*Client, error) {
+func NewClient(key, secret string) (*Client, error) {
 
-	reqInterval := 1000 * time.Millisecond / time.Duration(conf.MaxRequestsSec)
+	reqInterval := 1000 * time.Millisecond / time.Duration(maxRequestsSec)
 
 	client := http.Client{
-		Timeout: time.Duration(conf.HTTPClientTimeoutSec) * time.Second,
+		Timeout: time.Duration(httpClientTimeoutSec) * time.Second,
 	}
 
-	if len(conf.ApiKey) == 0 || len(conf.ApiSecret) == 0 {
+	if len(key) == 0 || len(secret) == 0 {
 
 		err := errors.New("new trading client: wrong apikey and/or apisecret")
 		return nil, err
 	}
 
 	tc := Client{
-		conf.ApiKey,
-		conf.ApiSecret,
+		key,
+		secret,
 		&client,
 		time.Tick(reqInterval),
 	}
@@ -143,7 +120,7 @@ func (c *Client) do(form url.Values) ([]byte, error) {
 	form.Add("nonce", strconv.Itoa(int(nonce)))
 
 	req, err := http.NewRequest("POST",
-		conf.APIUrl,
+		apiUrl,
 		strings.NewReader(form.Encode()))
 
 	if err != nil {
