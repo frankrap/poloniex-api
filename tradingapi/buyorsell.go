@@ -60,6 +60,10 @@ func (client *Client) Buy(currencyPair string, rate, amount float64) (*BuyOrSell
 	return client.buyOrSell("buy", currencyPair, rate, amount, "")
 }
 
+func (client *Client) MarginBuy(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
+	return client.buyOrSell("marginBuy", currencyPair, rate, amount, "")
+}
+
 func (client *Client) SellFillOrKill(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
 	return client.buyOrSell("sell", currencyPair, rate, amount, "fillOrKill")
 }
@@ -74,6 +78,10 @@ func (client *Client) SellPostOnly(currencyPair string, rate, amount float64) (*
 
 func (client *Client) Sell(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
 	return client.buyOrSell("sell", currencyPair, rate, amount, "")
+}
+
+func (client *Client) MarginSell(currencyPair string, rate, amount float64) (*BuyOrSellOrder, error) {
+	return client.buyOrSell("marginSell", currencyPair, rate, amount, "")
 }
 
 func (client *Client) buyOrSell(command, currencyPair string, rate, amount float64, option string) (*BuyOrSellOrder, error) {
